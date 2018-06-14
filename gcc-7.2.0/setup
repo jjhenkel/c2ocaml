@@ -1,0 +1,32 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+echo "[c2ocaml] Building custom GCC..."
+docker build \
+  --label="c2ocaml" \
+  -t jjhenkel/gcc7.2.0 \
+  -f $DIR/Dockerfile $DIR \
+  &> $DIR/../logs/gcc7.2.0-image-build.log
+
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+  echo "[c2ocaml] GCC 7.2.0 image failed to build."
+  exit $STATUS
+else
+  echo "[c2ocaml] Image build complete!"
+fi
+
+echo "[c2ocaml] Populating volume with gcc7.2.0..."
+docker rm gcc7.2.0 &> /dev/null
+docker run --name=gcc7.2.0 --label="c2ocaml" jjhenkel/gcc7.2.0 \
+  &> $DIR/../logs/gcc7.2.0-volume-populate.log
+
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+  echo "[c2ocaml] GCC volume population failed."
+  exit $STATUS
+else
+  echo "[c2ocaml] Volume populated!"
+  exit 0
+fi

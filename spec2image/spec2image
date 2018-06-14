@@ -1,0 +1,171 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# DIR="$DIR/src/spec2image"
+
+# Check for (enhanced) get opts
+getopt --test > /dev/null
+if [[ $? -ne 4 ]]; then
+    # Not there, fail
+    echo "$0: Error: `getopt --test` failed in this environment."
+    exit 1
+fi
+
+OPTIONS=bqt:l:e:
+LONGOPTS=base,quiet,tag:,label:,entrypoint:
+
+# Temporarily store output to be able to check for errors
+# -e.g. use “--options” parameter by name to activate quoting/enhanced mode
+# -pass arguments only via  -- "$@"  to separate them correctly
+PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@")
+if [[ $? -ne 0 ]]; then
+    # e.g. $? == 1
+    #  then getopt has complained about wrong arguments to stdout
+    exit 2
+fi
+
+# Read getopt’s output this way to handle the quoting right:
+eval set -- "$PARSED"
+
+# Defaults 
+t="spec2image"
+l="spec2image"
+e="$DIR/entrypoint.sh"
+
+# Now enjoy the options in order and nicely split until we see --
+while true; do
+    case "$1" in
+        -t|--tag)
+            t="$2"
+            shift 2
+            ;;
+        -l|--label)
+            l="$2"
+            shift 2
+            ;;
+        -e|--entrypoint)
+            e="$2"
+            shift 2
+            ;;
+        -q|--quiet)
+            q=y
+            shift
+            ;;
+        -b|--base)
+            b=y
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "$0: Error: Unmatched argument."
+            exit 3
+            ;;
+    esac
+done
+
+# Handle non-option arguments
+if [[ $# -lt 1 ]]; then
+    echo "$0: No specification file(s) given."
+    exit 4
+fi
+
+# Go through each matching spec file and build image
+shopt -s nullglob
+for spec in $@
+do
+    # Make sure the file exists 
+    if [ ! -f "$spec" ]
+    then
+        echo "$0: $spec is not a valid specification file (does not exist)."
+        exit 5
+    fi 
+
+    # Pull in our spec
+    source $spec
+
+    # Enforce our one basic requirment (file must be named $PROJECT.env)
+    if [ "$(basename $spec .env)" != "$PROJECT" ]
+    then 
+        echo "$0: Error: spec file $spec has an invalid name."
+        exit 6
+    fi
+
+    if [ "$b" ]; then
+        if [[ "$(docker images -q $t/$PROJECT 2> /dev/null)" != "" ]]; then
+            echo "Base image already built. Skipping..."
+            exit 0
+        fi 
+    fi
+
+    # Make sure context is empty
+    rm -rf $DIR/.context-$PROJECT
+    mkdir -p $DIR/.context-$PROJECT
+    mkdir -p $DIR/.context-$PROJECT/tools
+
+    # Prep specific docker context (to enable better layer caching)
+    cp $spec $DIR/.context-$PROJECT
+    cp $DIR/Dockerfile $DIR/.context-$PROJECT
+    cp $e $DIR/.context-$PROJECT
+    cp $DIR/tools/* $DIR/.context-$PROJECT/tools
+
+    # If we have a special base image, deal with that now
+    if [ "$PROJECT_BASE" ]
+    then
+        if [ "$b" ]
+        then 
+            echo "$0: Error: Base images cannot have a base themselves."
+            rm -rf $DIR/.context-$PROJECT
+            exit 7
+        fi
+        echo "Base image detected... building base image first"
+        $DIR/../../spec2image -b -q -t $t -l $l "$(dirname $spec)/$PROJECT_BASE"
+        echo "Base image built. Continuing..."
+        sed -i "1s/.*/FROM $t\/$(basename $PROJECT_BASE .env)/" \
+          $DIR/.context-$PROJECT/Dockerfile
+    fi
+
+    if [ "$b" ]
+    then
+        rm $DIR/.context-$PROJECT/Dockerfile
+        cp $DIR/Dockerfile.base $DIR/.context-$PROJECT/Dockerfile
+    fi
+
+    # Actually build the image using info from spec
+    echo "Building image for project $PROJECT..."
+
+    # Actually build the image
+    if [ "$q" ]
+    then
+        docker build \
+            --label="$l" \
+            -t $t/$PROJECT \
+            -f $DIR/.context-$PROJECT/Dockerfile \
+            --build-arg PROJECT="$PROJECT" \
+            --build-arg PROJECT_GIT_URL="$PROJECT_GIT_URL" \
+            --build-arg PROJECT_DEPS="$PROJECT_DEPS" \
+            --build-arg PROJECT_SETUP="$PROJECT_SETUP" \
+            --build-arg PROJECT_CLEAN="$PROJECT_CLEAN" \
+            --build-arg PROJECT_MAKE="$PROJECT_MAKE" \
+            --build-arg PLUGIN_SPEC="$PLUGIN_SPEC" \
+            $DIR/.context-$PROJECT 2>&1 > /dev/null
+    else
+        docker build \
+            --label="$l" \
+            -t $t/$PROJECT \
+            -f $DIR/.context-$PROJECT/Dockerfile \
+            --build-arg PROJECT="$PROJECT" \
+            --build-arg PROJECT_GIT_URL="$PROJECT_GIT_URL" \
+            --build-arg PROJECT_DEPS="$PROJECT_DEPS" \
+            --build-arg PROJECT_SETUP="$PROJECT_SETUP" \
+            --build-arg PROJECT_CLEAN="$PROJECT_CLEAN" \
+            --build-arg PROJECT_MAKE="$PROJECT_MAKE" \
+            --build-arg PLUGIN_SPEC="$PLUGIN_SPEC" \
+            $DIR/.context-$PROJECT 
+    fi
+
+    # Cleanup a bit
+    rm -rf $DIR/.context-$PROJECT
+done

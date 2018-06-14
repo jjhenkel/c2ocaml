@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Use our (renamed) real gcc* binaries 
+unlink /usr/local/bin/cc
+unlink /usr/local/bin/gcc
+unlink /usr/local/bin/g++
+unlink /usr/local/bin/gnat
+unlink /usr/local/bin/gccgo
+unlink /usr/local/bin/gfortran
+
+ln -s -f /usr/local/bin/cc_ /usr/local/bin/cc
+ln -s -f /usr/local/bin/gcc_ /usr/local/bin/gcc
+ln -s -f /usr/local/bin/g++_ /usr/local/bin/g++
+ln -s -f /usr/local/bin/gnat_ /usr/local/bin/gnat
+ln -s -f /usr/local/bin/gccgo_ /usr/local/bin/gccgo
+ln -s -f /usr/local/bin/gfortran_ /usr/local/bin/gfortran

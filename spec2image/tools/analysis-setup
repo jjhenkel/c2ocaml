@@ -1,0 +1,20 @@
+
+#!/bin/bash
+
+# Using lpl analysis on/off we can symlink to either gcc_ or lpl-gcc
+# which effectively points us at something with analysis or 
+# something without 
+
+# Create our wrappers 
+echo "#!/bin/bash\n/usr/local/bin/gcc_ $1 \"\$@\"" > /usr/local/bin/lpl-gcc
+echo "#!/bin/bash\n/usr/local/bin/g++_ $1 \"\$@\"" > /usr/local/bin/lpl-g++
+echo "#!/bin/bash\n/usr/local/bin/gnat_ $1 \"\$@\"" > /usr/local/bin/lpl-gnat
+echo "#!/bin/bash\n/usr/local/bin/gccgo_ $1 \"\$@\"" > /usr/local/bin/lpl-gccgo
+echo "#!/bin/bash\n/usr/local/bin/gfortran_ $1 \"\$@\"" > /usr/local/bin/lpl-gfortran
+
+# Make it all executable
+chmod +x /usr/local/bin/lpl-gcc
+chmod +x /usr/local/bin/lpl-g++
+chmod +x /usr/local/bin/lpl-gnat
+chmod +x /usr/local/bin/lpl-gccgo
+chmod +x /usr/local/bin/lpl-gfortran

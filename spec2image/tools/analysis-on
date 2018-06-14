@@ -1,0 +1,18 @@
+#!/bin/bash 
+
+# Use our driver scripts that enable analysis
+if [ -f /usr/local/bin/gcc ]; then
+  unlink /usr/local/bin/cc
+  unlink /usr/local/bin/gcc
+  unlink /usr/local/bin/g++
+  unlink /usr/local/bin/gnat
+  unlink /usr/local/bin/gccgo
+  unlink /usr/local/bin/gfortran
+fi
+
+ln -s -f /usr/local/bin/lpl-gcc /usr/local/bin/cc
+ln -s -f /usr/local/bin/lpl-gcc /usr/local/bin/gcc
+ln -s -f /usr/local/bin/lpl-g++ /usr/local/bin/g++
+ln -s -f /usr/local/bin/lpl-gnat /usr/local/bin/gnat
+ln -s -f /usr/local/bin/lpl-gccgo /usr/local/bin/gccgo
+ln -s -f /usr/local/bin/lpl-gfortran /usr/local/bin/gfortran
