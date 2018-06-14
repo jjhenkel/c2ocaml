@@ -7,6 +7,11 @@ ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 .PHONY: gcc7.2.0
 .PHONY: c2ocaml
 .PHONY: redis
+.PHONY: nginx
+.PHONY: hexchat
+.PHONY: nmap
+.PHONY: curl
+.PHONY: linux
 
 .DEFAULT_GOAL := help
 
@@ -52,4 +57,108 @@ redis: gcc7.2.0 c2ocaml ## Builds redis and transforms built files from C/C++ to
 	mv ${ROOT_DIR}/artifacts/redis-merged ${ROOT_DIR}/artifacts/redis
 	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/redis" directory."
 	@echo "[c2ocaml] Use lsee to generate traces"
-	
+
+nginx: gcc7.2.0 c2ocaml ## Builds nginx and transforms built files from C/C++ to OCaml.
+	@echo "[c2ocaml] Building nginx docker image..."
+	${ROOT_DIR}/spec2image/spec2image --entrypoint=${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/nginx.env
+	@echo "[c2ocaml] Built!"
+	@echo "[c2ocaml] Ingesting nginx..."
+	docker run -it --rm \
+		--volumes-from=c2ocaml-gcc7.2.0 \
+		--volumes-from=c2ocaml-build \
+		-v ${ROOT_DIR}/artifacts/nginx:/common/facts \
+		c2ocaml/nginx \
+		63e8a1d926251469b708c6248c3b1849bd018b40
+	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/nginx -type f -name "*.ml" | wc -l) procedures!"
+	@echo "[c2ocaml] Merging ingested procedures..."
+	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/nginx
+	@echo "[c2ocaml] Created $$(find ${ROOT_DIR}/artifacts/nginx-merged -type f | wc -l) merged files"
+	@echo "[c2ocaml] Cleaning up..."
+	docker run -it --rm -v ${ROOT_DIR}/artifacts:/common/facts debian:stretch rm -rf /common/facts/nginx
+	mv ${ROOT_DIR}/artifacts/nginx-merged ${ROOT_DIR}/artifacts/nginx
+	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/nginx" directory."
+	@echo "[c2ocaml] Use lsee to generate traces"
+
+hexchat: gcc7.2.0 c2ocaml ## Builds hexchat and transforms built files from C/C++ to OCaml.
+	@echo "[c2ocaml] Building hexchat docker image..."
+	${ROOT_DIR}/spec2image/spec2image --entrypoint=${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/hexchat.env
+	@echo "[c2ocaml] Built!"
+	@echo "[c2ocaml] Ingesting hexchat..."
+	docker run -it --rm \
+		--volumes-from=c2ocaml-gcc7.2.0 \
+		--volumes-from=c2ocaml-build \
+		-v ${ROOT_DIR}/artifacts/hexchat:/common/facts \
+		c2ocaml/hexchat \
+		a3db4e577307742965f5ba75daf03146164bd211
+	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/hexchat -type f -name "*.ml" | wc -l) procedures!"
+	@echo "[c2ocaml] Merging ingested procedures..."
+	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/hexchat
+	@echo "[c2ocaml] Created $$(find ${ROOT_DIR}/artifacts/hexchat-merged -type f | wc -l) merged files"
+	@echo "[c2ocaml] Cleaning up..."
+	docker run -it --rm -v ${ROOT_DIR}/artifacts:/common/facts debian:stretch rm -rf /common/facts/hexchat
+	mv ${ROOT_DIR}/artifacts/hexchat-merged ${ROOT_DIR}/artifacts/hexchat
+	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/hexchat" directory."
+	@echo "[c2ocaml] Use lsee to generate traces"
+
+nmap: gcc7.2.0 c2ocaml ## Builds nmap and transforms built files from C/C++ to OCaml.
+	@echo "[c2ocaml] Building nmap docker image..."
+	${ROOT_DIR}/spec2image/spec2image --entrypoint=${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/nmap.env
+	@echo "[c2ocaml] Built!"
+	@echo "[c2ocaml] Ingesting nmap..."
+	docker run -it --rm \
+		--volumes-from=c2ocaml-gcc7.2.0 \
+		--volumes-from=c2ocaml-build \
+		-v ${ROOT_DIR}/artifacts/nmap:/common/facts \
+		c2ocaml/nmap \
+		88b68c45aacc29639940023d9574dc2e851bf8ab
+	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/nmap -type f -name "*.ml" | wc -l) procedures!"
+	@echo "[c2ocaml] Merging ingested procedures..."
+	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/nmap
+	@echo "[c2ocaml] Created $$(find ${ROOT_DIR}/artifacts/nmap-merged -type f | wc -l) merged files"
+	@echo "[c2ocaml] Cleaning up..."
+	docker run -it --rm -v ${ROOT_DIR}/artifacts:/common/facts debian:stretch rm -rf /common/facts/nmap
+	mv ${ROOT_DIR}/artifacts/nmap-merged ${ROOT_DIR}/artifacts/nmap
+	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/nmap" directory."
+	@echo "[c2ocaml] Use lsee to generate traces"
+
+curl: gcc7.2.0 c2ocaml ## Builds curl and transforms built files from C/C++ to OCaml.
+	@echo "[c2ocaml] Building curl docker image..."
+	${ROOT_DIR}/spec2image/spec2image --entrypoint=${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/curl.env
+	@echo "[c2ocaml] Built!"
+	@echo "[c2ocaml] Ingesting curl..."
+	docker run -it --rm \
+		--volumes-from=c2ocaml-gcc7.2.0 \
+		--volumes-from=c2ocaml-build \
+		-v ${ROOT_DIR}/artifacts/curl:/common/facts \
+		c2ocaml/curl \
+		cf448436facd28da1bafe031d14a8bc4f165ddaa
+	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/curl -type f -name "*.ml" | wc -l) procedures!"
+	@echo "[c2ocaml] Merging ingested procedures..."
+	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/curl
+	@echo "[c2ocaml] Created $$(find ${ROOT_DIR}/artifacts/curl-merged -type f | wc -l) merged files"
+	@echo "[c2ocaml] Cleaning up..."
+	docker run -it --rm -v ${ROOT_DIR}/artifacts:/common/facts debian:stretch rm -rf /common/facts/curl
+	mv ${ROOT_DIR}/artifacts/curl-merged ${ROOT_DIR}/artifacts/curl
+	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/curl" directory."
+	@echo "[c2ocaml] Use lsee to generate traces"
+
+linux: gcc7.2.0 c2ocaml ## Builds linux v4.5-rc4 and transforms built files from C/C++ to OCaml.
+	@echo "[c2ocaml] Building linux docker image..."
+	${ROOT_DIR}/spec2image/spec2image --entrypoint=${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/linux/v4.5-rc4/allyes.env
+	@echo "[c2ocaml] Built!"
+	@echo "[c2ocaml] Ingesting linux..."
+	docker run -it --rm \
+		--volumes-from=c2ocaml-gcc7.2.0 \
+		--volumes-from=c2ocaml-build \
+		-v ${ROOT_DIR}/artifacts/linux:/common/facts \
+		c2ocaml/allyes \
+		fd7cd061adcf5f7503515ba52b6a724642a839c8
+	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/linux -type f -name "*.ml" | wc -l) procedures!"
+	@echo "[c2ocaml] Merging ingested procedures..."
+	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/linux
+	@echo "[c2ocaml] Created $$(find ${ROOT_DIR}/artifacts/linux-merged -type f | wc -l) merged files"
+	@echo "[c2ocaml] Cleaning up..."
+	docker run -it --rm -v ${ROOT_DIR}/artifacts:/common/facts debian:stretch rm -rf /common/facts/linux
+	mv ${ROOT_DIR}/artifacts/linux-merged ${ROOT_DIR}/artifacts/linux
+	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/linux" directory."
+	@echo "[c2ocaml] Use lsee to generate traces"
