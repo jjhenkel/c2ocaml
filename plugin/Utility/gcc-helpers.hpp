@@ -234,11 +234,11 @@ inline std::string gcc_str_code_inverse(int32_t code) {
   case UNGT_EXPR:
     return "bungt_inv";
   case UNGE_EXPR:
-    return "bunge_inv";
+    return "bungte_inv";
   case UNLT_EXPR:
     return "bunlt_inv";
   case UNLE_EXPR:
-    return "bunle_inv";
+    return "bunlte_inv";
   case UNEQ_EXPR:
     return "buneq_inv";
   case UNORDERED_EXPR:

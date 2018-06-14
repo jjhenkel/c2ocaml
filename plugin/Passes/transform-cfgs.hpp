@@ -119,6 +119,11 @@ public:
     fp /= name;
     fp += ".ml";
 
+    // Collapse /../ --> /
+    auto helper = fp.string();
+    util::str_replace_all(helper, "/../", "/");
+    fp = helper;
+
     if (util::fexists(fp.string())) {
       std::cerr << fp.string() << " exists... skipping." << std::endl;
       return constants::GCC_EXECUTE_SUCCESS;
@@ -614,7 +619,7 @@ public:
 
     OUTP << PathEnumerator::Enumerate(procedure) << std::endl;
 
-    OUTP << "  in Proc.proc(" << std::endl;;
+    OUTP << "  in Proc.proc(" << std::endl;
     OUTP << "   \"" << name << "\"," << std::endl;
     OUTP << "    " << procedure->funcdef_no << "," << std::endl;
     OUTP << "   \"" << util::repo_cwd() << "\"," << std::endl;

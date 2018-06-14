@@ -703,7 +703,9 @@ inline std::string _transform_ast(
         EPREFIX,
         UNSUPPORTED_EXPR,
         LPAREN,
+        RAW_STR_OPEN,
         "VIEW_CONVERT_EXPR",
+        RAW_STR_CLOSE,
         RPAREN
       );
     }
