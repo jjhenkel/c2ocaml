@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ex;
 
+chown -R `stat -c "%u:%g" /common/facts` /common/facts
+
 # First, grab them from the volume
 cp -r /mnt/gcc7.2.0/* /usr/local/
 

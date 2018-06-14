@@ -43,3 +43,13 @@ redis: gcc7.2.0 c2ocaml ## Builds redis and transforms built files from C/C++ to
 		-v ${ROOT_DIR}/artifacts/redis:/common/facts \
 		c2ocaml/redis \
 		40d5df6547308db2f5d71432b10fa84a9844edff
+	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/redis -type f -name "*.ml" | wc -l) procedures!"
+	@echo "[c2ocaml] Merging ingested procedures..."
+	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/redis
+	@echo "[c2ocaml] Created $$(find ${ROOT_DIR}/artifacts/redis-merged -type f | wc -l) merged files"
+	@echo "[c2ocaml] Cleaning up..."
+	docker run -it --rm -v ${ROOT_DIR}/artifacts:/common/facts debian:stretch rm -rf /common/facts/redis
+	mv ${ROOT_DIR}/artifacts/redis-merged ${ROOT_DIR}/artifacts/redis
+	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/redis" directory."
+	@echo "[c2ocaml] Use lsee to generate traces"
+	
