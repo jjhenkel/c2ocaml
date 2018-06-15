@@ -1,5 +1,4 @@
 SHELL=/bin/bash
-I_PREFIX=ubi
 
 ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
