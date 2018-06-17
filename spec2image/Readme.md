@@ -51,7 +51,7 @@ PROJECT_DEPS="make libtool autoconf automake libssl-dev"
 PROJECT_SETUP="./configure"
 
 PROJECT_CLEAN="make clean"
-PROJECT_MAKE="make -j$(nproc)"
+PROJECT_MAKE="make -j$(getconf _NPROCESSORS_ONLN)"
 
 PLUGIN_NAME="letstransform"
 PLUGIN_PATH="/common/plugins/$PLUGIN_NAME"
@@ -66,6 +66,6 @@ A key feature of this tool is the generation of an image where critical applicat
 Furthermore, we've found that writing _the analysis tools themselves_ into Docker images gives us even more flexibility. With the help of `volumes` we are able to repeatably build our analysis infrastructure and `mount` the compiled tools for use in other containers. 
  
 
-**Note:** In docker, `$(nproc)` returns the _number of processors on the host machine_. This is fine, as long as you haven't set resource limits. There [may be some issues](https://github.com/moby/moby/pull/31756) with having `$(nproc)` reflect limits (or they may be resolved by now, I just remember reading an [issue related to this](https://github.com/moby/moby/issues/31358)).
+**Note:** In docker, `$(getconf _NPROCESSORS_ONLN)` returns the _number of processors on the host machine_. This is fine, as long as you haven't set resource limits. There [may be some issues](https://github.com/moby/moby/pull/31756) with having `$(getconf _NPROCESSORS_ONLN)` reflect limits (or they may be resolved by now, I just remember reading an [issue related to this](https://github.com/moby/moby/issues/31358)).
 
 **Note:** This lack of template support is likely due to the fact that most production usages of Docker focus on a small set of images and thousands of running containers whereas the analysis community has needs for many unique images and containers. 

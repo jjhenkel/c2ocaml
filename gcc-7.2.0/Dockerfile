@@ -117,7 +117,7 @@ RUN set -ex; \
 		--enable-languages=ada,c,c++,fortran,go,jit,lto,objc,obj-c++ \
 		$extraConfigureArgs \
 	; \
-	make -j "$(nproc)"; \
+	make -j "$(getconf _NPROCESSORS_ONLN)"; \
 	make install-strip; \
 	\
 	cd ..; \
