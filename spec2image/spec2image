@@ -1,70 +1,37 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-# DIR="$DIR/src/spec2image"
-
-# Check for (enhanced) get opts
-getopt --test > /dev/null
-if [[ $? -ne 4 ]]; then
-    # Not there, fail
-    echo "$0: Error: `getopt --test` failed in this environment."
-    exit 1
-fi
-
-OPTIONS=bqt:l:e:
-LONGOPTS=base,quiet,tag:,label:,entrypoint:
-
-# Temporarily store output to be able to check for errors
-# -e.g. use “--options” parameter by name to activate quoting/enhanced mode
-# -pass arguments only via  -- "$@"  to separate them correctly
-PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@")
-if [[ $? -ne 0 ]]; then
-    # e.g. $? == 1
-    #  then getopt has complained about wrong arguments to stdout
-    exit 2
-fi
-
-# Read getopt’s output this way to handle the quoting right:
-eval set -- "$PARSED"
 
 # Defaults 
 t="spec2image"
 l="spec2image"
 e="$DIR/entrypoint.sh"
 
-# Now enjoy the options in order and nicely split until we see --
-while true; do
-    case "$1" in
-        -t|--tag)
-            t="$2"
-            shift 2
+while getopts ":bqt:l:e:" FLAG; do
+    case "${FLAG}" in
+        t)
+            t=${OPTARG}
             ;;
-        -l|--label)
-            l="$2"
-            shift 2
+        l)
+            l=${OPTARG}
             ;;
-        -e|--entrypoint)
-            e="$2"
-            shift 2
+        e)
+            e=${OPTARG}
             ;;
-        -q|--quiet)
+        q)
             q=y
-            shift
             ;;
-        -b|--base)
+        b)
             b=y
-            shift
             ;;
-        --)
-            shift
-            break
-            ;;
-        *)
+        \?)
             echo "$0: Error: Unmatched argument."
             exit 3
             ;;
     esac
 done
+
+shift $((OPTIND - 1))
 
 # Handle non-option arguments
 if [[ $# -lt 1 ]]; then

@@ -38,7 +38,7 @@ c2ocaml: ## Ensures that our c2ocaml source-to-source transformation plugin is p
 
 redis: gcc7.2.0 c2ocaml ## Builds redis and transforms built files from C/C++ to OCaml.
 	@echo "[c2ocaml] Building redis docker image..."
-	${ROOT_DIR}/spec2image/spec2image --entrypoint=${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/redis.env
+	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/redis.env
 	@echo "[c2ocaml] Built!"
 	@echo "[c2ocaml] Ingesting redis..."
 	docker run -it --rm \
@@ -59,7 +59,7 @@ redis: gcc7.2.0 c2ocaml ## Builds redis and transforms built files from C/C++ to
 
 nginx: gcc7.2.0 c2ocaml ## Builds nginx and transforms built files from C/C++ to OCaml.
 	@echo "[c2ocaml] Building nginx docker image..."
-	${ROOT_DIR}/spec2image/spec2image --entrypoint=${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/nginx.env
+	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/nginx.env
 	@echo "[c2ocaml] Built!"
 	@echo "[c2ocaml] Ingesting nginx..."
 	docker run -it --rm \
@@ -80,7 +80,7 @@ nginx: gcc7.2.0 c2ocaml ## Builds nginx and transforms built files from C/C++ to
 
 hexchat: gcc7.2.0 c2ocaml ## Builds hexchat and transforms built files from C/C++ to OCaml.
 	@echo "[c2ocaml] Building hexchat docker image..."
-	${ROOT_DIR}/spec2image/spec2image --entrypoint=${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/hexchat.env
+	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/hexchat.env
 	@echo "[c2ocaml] Built!"
 	@echo "[c2ocaml] Ingesting hexchat..."
 	docker run -it --rm \
@@ -101,7 +101,7 @@ hexchat: gcc7.2.0 c2ocaml ## Builds hexchat and transforms built files from C/C+
 
 nmap: gcc7.2.0 c2ocaml ## Builds nmap and transforms built files from C/C++ to OCaml.
 	@echo "[c2ocaml] Building nmap docker image..."
-	${ROOT_DIR}/spec2image/spec2image --entrypoint=${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/nmap.env
+	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/nmap.env
 	@echo "[c2ocaml] Built!"
 	@echo "[c2ocaml] Ingesting nmap..."
 	docker run -it --rm \
@@ -122,7 +122,7 @@ nmap: gcc7.2.0 c2ocaml ## Builds nmap and transforms built files from C/C++ to O
 
 curl: gcc7.2.0 c2ocaml ## Builds curl and transforms built files from C/C++ to OCaml.
 	@echo "[c2ocaml] Building curl docker image..."
-	${ROOT_DIR}/spec2image/spec2image --entrypoint=${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/curl.env
+	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/curl.env
 	@echo "[c2ocaml] Built!"
 	@echo "[c2ocaml] Ingesting curl..."
 	docker run -it --rm \
@@ -143,7 +143,7 @@ curl: gcc7.2.0 c2ocaml ## Builds curl and transforms built files from C/C++ to O
 
 linux: gcc7.2.0 c2ocaml ## Builds linux v4.5-rc4 and transforms built files from C/C++ to OCaml.
 	@echo "[c2ocaml] Building linux docker image..."
-	${ROOT_DIR}/spec2image/spec2image --entrypoint=${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/linux/v4.5-rc4/allyes.env
+	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/linux/v4.5-rc4/allyes.env
 	@echo "[c2ocaml] Built!"
 	@echo "[c2ocaml] Ingesting linux..."
 	docker run -it --rm \
