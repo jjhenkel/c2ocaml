@@ -3,7 +3,7 @@
 # More cross-platform madness
 # OSX's sed treats '-i' differently than GNU
 sedi () {
-    sed --version >/dev/null 2>&1 && sed -i -- "$@" || sed -i "" "$@"
+    sed --version >/dev/null 2>&1 && sed -i -E "$@" || sed -i "" -E "$@"
 }
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
