@@ -125,11 +125,11 @@ public:
     fp = helper;
 
     if (util::fexists(fp.string())) {
-      std::cerr << fp.string() << " exists... skipping." << std::endl;
+      std::cerr << fp.string() + " exists... skipping.\n";
       return constants::GCC_EXECUTE_SUCCESS;
     }
 
-    std::cerr << "Created: " << fp.string() << std::endl;
+    std::cerr << "Created: " + fp.string() + "\n";
 
     fs::create_directories(fp.parent_path());
 
