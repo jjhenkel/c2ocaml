@@ -86,7 +86,7 @@ nginx: gcc7.2.0 c2ocaml ## Builds nginx and transforms built files from C/C++ to
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/nginx:/common/facts \
 		c2ocaml/nginx \
-		63e8a1d926251469b708c6248c3b1849bd018b40
+		4bf4650f2f10f7bbacfe7a33da744f18951d416d
 	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/nginx -type f -name "*.ml" | wc -l) procedures!"
 	@echo "[c2ocaml] Merging ingested procedures..."
 	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/nginx
