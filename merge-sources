@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# More cross-platform madness
+# OSX's sed treats '-i' differently than GNU
+sedi () {
+    sed --version >/dev/null 2>&1 && sed -i -- "$@" || sed -i "" "$@"
+}
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 mkdir -p "$1-merged"
@@ -15,8 +21,8 @@ for d in $(find $1 -mindepth 1 -type d ); do
     cat $DIR/artifacts/preamble.txt $d/*.ml > "$MERGED"
     
     # Cleanup with sed 
-    sed -i -E 's/Z\.of_string "D\.[0-9]+?"/Z.of_string "0"/' "$MERGED"
-    sed -i -E 's/Z\.of_string ""/Z.of_string "0"/' "$MERGED"
-    sed -i -E 's/,  Inf/, infinity/' "$MERGED"
+    sedi 's/Z\.of_string "D\.[0-9]+?"/Z.of_string "0"/' "$MERGED"
+    sedi 's/Z\.of_string ""/Z.of_string "0"/' "$MERGED"
+    sedi 's/,  Inf/, infinity/' "$MERGED"
   fi
 done
