@@ -21,7 +21,7 @@ for d in $(find $1 -mindepth 1 -type d ); do
     cat $DIR/artifacts/preamble.txt $d/*.ml > "$MERGED"
     
     # Cleanup with sed 
-    sedi 's/Z\.of_string "D\.[0-9]+?"/Z.of_string "0"/' "$MERGED"
+    sedi 's/Z\.of_string "D\.[0-9]+"/Z.of_string "0"/' "$MERGED"
     sedi 's/Z\.of_string ""/Z.of_string "0"/' "$MERGED"
     sedi 's/,  Inf/, infinity/' "$MERGED"
   fi
