@@ -1,0 +1,2467 @@
+[c2ocaml] Ensuring we have gcc7.2.0
+docker pull jjhenkel/gcc7.2.0
+Using default tag: latest
+latest: Pulling from jjhenkel/gcc7.2.0
+Digest: sha256:4c6281fa017bdde172cb1e39257e9384c3a8bb55ff4c8f81c261e046e50fb710
+Status: Image is up to date for jjhenkel/gcc7.2.0:latest
+[c2ocaml] Creating c2ocaml-gcc7.2.0 container
+docker rm c2ocaml-gcc7.2.0 &> /dev/null || true
+docker run --name=c2ocaml-gcc7.2.0 jjhenkel/gcc7.2.0 /entrypoint.sh
+[c2ocaml] Copying GCC 7.2.0 to output volume
+[c2ocaml] Ensuring we have c2ocaml
+docker pull jjhenkel/c2ocaml
+Using default tag: latest
+latest: Pulling from jjhenkel/c2ocaml
+Digest: sha256:47f25b23e0112707ccfa6745d9d9cba9c3d4578be83e55d9d7d84afd5d551153
+Status: Image is up to date for jjhenkel/c2ocaml:latest
+[c2ocaml] Creating c2ocaml-build container
+docker rm c2ocaml-build &> /dev/null || true
+docker run --name=c2ocaml-build --volumes-from=c2ocaml-gcc7.2.0:ro -v /home/jjhenkel/workspace/code-vectors-artifact/c2ocaml/plugin:/app/Lets/Transform/plugin jjhenkel/c2ocaml
++ mv /usr/bin/cc /usr/bin/cc_
++ mv /usr/bin/gcc /usr/bin/gcc_
++ ln -s /mnt/gcc7.2.0/bin/gcc /usr/bin/cc
++ ln -s /mnt/gcc7.2.0/bin/gcc /usr/bin/gcc
++ ln -s /mnt/gcc7.2.0/bin/g++ /usr/bin/g++
++ echo Configuring...
++ cd ./plugin/Build
+Configuring...
++ cmake .
+-- cotire 1.7.10 loaded.
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /app/Lets/Transform/plugin/Build
+Building plugin...
++ echo 'Building plugin...'
++ make
+Scanning dependencies of target c2ocaml
+[ 25%] Building CXX object CMakeFiles/c2ocaml.dir/app/Lets/Transform/plugin/entry.cpp.o
+[ 50%] Linking CXX shared library /common/plugins/c2ocaml
+[100%] Built target c2ocaml
+[c2ocaml] Building hexchat docker image...
+/home/jjhenkel/workspace/code-vectors-artifact/c2ocaml/spec2image/spec2image -e /home/jjhenkel/workspace/code-vectors-artifact/c2ocaml/corpus/entrypoint.sh -l c2ocaml -t c2ocaml /home/jjhenkel/workspace/code-vectors-artifact/c2ocaml/corpus/hexchat.env
+Building image for project hexchat...
+Sending build context to Docker daemon  19.46kB
+Step 1/15 : FROM debian:stretch
+ ---> 2b98c9851a37
+Step 2/15 : RUN set -ex; apt-get update && apt-get install -y   git   gcc   g++   libc-dev   binutils   libmpc-dev   libgmp-dev   libmpfr-dev   ca-certificates
+ ---> Using cache
+ ---> f3720e0b62cc
+Step 3/15 : ARG PROJECT
+ ---> Using cache
+ ---> 1556b3c4541b
+Step 4/15 : ARG PROJECT_GIT_URL
+ ---> Using cache
+ ---> a25c21e59a47
+Step 5/15 : ARG PROJECT_DEPS
+ ---> Using cache
+ ---> 6625dab1bbd0
+Step 6/15 : ARG PROJECT_SETUP
+ ---> Using cache
+ ---> 01c9ccb9c199
+Step 7/15 : ARG PROJECT_CLEAN
+ ---> Using cache
+ ---> 6454239bc610
+Step 8/15 : ARG PROJECT_MAKE
+ ---> Using cache
+ ---> 83401c5ab486
+Step 9/15 : ARG PLUGIN_SPEC
+ ---> Using cache
+ ---> 83af8f11da32
+Step 10/15 : COPY ./tools /common/tools
+ ---> Using cache
+ ---> 5a91da36fac8
+Step 11/15 : RUN set -ex;     apt-get update && apt-get install -y $PROJECT_DEPS;     /common/tools/analysis-setup "$PLUGIN_SPEC";     mkdir -p /target/$PROJECT;     if [ "${PROJECT_GIT_URL}" ]; then       git clone $PROJECT_GIT_URL /target/$PROJECT;     fi
+ ---> Using cache
+ ---> 5d2662fba1d4
+Step 12/15 : RUN set -ex; cd /target/$PROJECT;     if [ "${PROJECT_SETUP}" ]; then       eval $PROJECT_SETUP;     fi;     echo "      pushd /target/$PROJECT ;      $PROJECT_CLEAN ;      STATUS=\$? ;      popd ;      exit \$STATUS    " > "/target/do-clean";     chmod +x "/target/do-clean";     echo "      pushd /target/$PROJECT ;      $PROJECT_MAKE ;      STATUS=\$? ;      popd ;      exit \$STATUS    " > "/target/do-make";     chmod +x "/target/do-make"
+ ---> Using cache
+ ---> f8e19ce87cc0
+Step 13/15 : COPY entrypoint.sh .
+ ---> Using cache
+ ---> 07e6c7d6880f
+Step 14/15 : ENTRYPOINT ./entrypoint.sh
+ ---> Using cache
+ ---> 2f8675683345
+Step 15/15 : LABEL c2ocaml ''
+ ---> Using cache
+ ---> 0e6a6b15b624
+Successfully built 0e6a6b15b624
+Successfully tagged c2ocaml/hexchat:latest
+[c2ocaml] Built!
+[c2ocaml] Ingesting hexchat...
+docker run -it --rm \
+	--volumes-from=c2ocaml-gcc7.2.0 \
+	--volumes-from=c2ocaml-build \
+	-v /home/jjhenkel/workspace/code-vectors-artifact/c2ocaml/artifacts/hexchat:/common/facts \
+	c2ocaml/hexchat \
+	a3db4e577307742965f5ba75daf03146164bd211
+++ stat -c %u:%g /common/facts
++ chown -R 0:0 /common/facts
++ cp -r /mnt/gcc7.2.0/bin /mnt/gcc7.2.0/etc /mnt/gcc7.2.0/games /mnt/gcc7.2.0/include /mnt/gcc7.2.0/lib /mnt/gcc7.2.0/lib64 /mnt/gcc7.2.0/libexec /mnt/gcc7.2.0/man /mnt/gcc7.2.0/sbin /mnt/gcc7.2.0/share /mnt/gcc7.2.0/src /usr/local/
++ cp /usr/local/bin/gcc /usr/local/bin/cc_
++ mv /usr/local/bin/gcc /usr/local/bin/gcc_
++ mv /usr/local/bin/g++ /usr/local/bin/g++_
++ mv /usr/local/bin/gnat /usr/local/bin/gnat_
++ mv /usr/local/bin/gccgo /usr/local/bin/gccgo_
++ mv /usr/local/bin/gfortran /usr/local/bin/gfortran_
++ ln -s -f /usr/local/bin/cc /usr/bin/cc
++ ln -s -f /usr/local/bin/gcc /usr/bin/gcc
++ ln -s -f /usr/local/bin/g++ /usr/bin/g++
++ ln -s -f /usr/local/bin/gnat /usr/bin/gnat
++ ln -s -f /usr/local/bin/gccgo /usr/bin/gccgo
++ ln -s -f /usr/local/bin/gfortran /usr/bin/gfortran
++ /target/checkout a3db4e577307742965f5ba75daf03146164bd211
+/target/hexchat /
+M	src/common/server.c
+HEAD is now at a3db4e57... Fix oob read in ctcp_check
+/
++ echo 'Activating analysis'
+Activating analysis
++ /common/tools/analysis-on
++ echo Analyzing...
+Analyzing...
++ /target/do-make
+/target/hexchat /
+ninja: Entering directory `build'
+[0/93] Generating marshal_c with a meson_exe.py custom command.[K[0/93] Generating marshal_h with a meson_exe.py custom command.[K[0/93] Generating textevents with a custom command.[K[0/93] Generating remote-object-glue with a custom command.[K[0/93] Generating resources_h with a custom command.[K[0/93] Generating resources_c with a custom command.[K[0/93] Compiling C object 'plugins/fishlim/plugins@fishlim@@fishlim@sha/plugin_hexchat.c.o'.[K[0/93] Compiling C object 'plugins/lua/plugins@lua@@lua@sha/lua.c.o'.[K[0/93] Compiling C object 'plugins/checksum/plugins@checksum@@checksum@sha/checksum.c.o'.[K[0/93] Compiling C object 'plugins/fishlim/plugins@fishlim@@fishlim@sha/irc.c.o'.[K[1/93] Generating remote-object-glue with a custom command.[K[1/93] Compiling C object 'plugins/fishlim/plugins@fishlim@@fishlim@sha/dh1080.c.o'.[K[2/93] Generating textevents with a custom command.[K[2/93] Compiling C object 'plugins/fishlim/plugins@fishlim@@fishlim@sha/keystore.c.o'.[K[3/93] Generating resources_h with a custom command.[K[3/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/dccgui.c.o'.[K[4/93] Generating resources_c with a custom command.[K[4/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/meson-generated_.._resources.c.o'.[K[5/93] Compiling C object 'plugins/fishlim/plugins@fishlim@@fishlim@sha/irc.c.o'.[K
+Created: /common/facts/plugins/fishlim/irc.c/irc_parse_message.ml
+Created: /common/facts/plugins/fishlim/irc.c/irc_prefix_get_nick.ml
+[5/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/ascii.c.o'.[K[6/93] Compiling C object 'plugins/fishlim/plugins@fishlim@@fishlim@sha/keystore.c.o'.[K
+Created: /common/facts/plugins/fishlim/keystore.c/get_keystore_password.ml
+Created: /common/facts/plugins/fishlim/keystore.c/getConfigFile.ml
+Created: /common/facts/plugins/fishlim/keystore.c/escape_nickname.ml
+Created: /common/facts/plugins/fishlim/keystore.c/get_nick_value.ml
+Created: /common/facts/plugins/fishlim/keystore.c/delete_nick.ml
+Created: /common/facts/plugins/fishlim/keystore.c/save_keystore.ml
+Created: /common/facts/plugins/fishlim/keystore.c/keystore_get_key.ml
+Created: /common/facts/plugins/fishlim/keystore.c/keystore_store_key.ml
+Created: /common/facts/plugins/fishlim/keystore.c/keystore_delete_nick.ml
+[6/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/chanlist.c.o'.[K[7/93] Compiling C object 'plugins/fishlim/plugins@fishlim@@fishlim@sha/dh1080.c.o'.[K
+Created: /common/facts/plugins/fishlim/dh1080.c/dh1080_encode_b64.ml
+Created: /common/facts/plugins/fishlim/dh1080.c/DH_verifyPubKey.ml
+/common/facts/usr/include/glib-2.0/glib/gstring.h/g_string_append_c_inline.ml exists... skipping.
+Created: /common/facts/plugins/fishlim/dh1080.c/dh1080_decode_b64.ml
+Created: /common/facts/plugins/fishlim/dh1080.c/dh1080_init.ml
+Created: /common/facts/plugins/fishlim/dh1080.c/dh1080_deinit.ml
+Created: /common/facts/plugins/fishlim/dh1080.c/dh1080_generate_key.ml
+Created: /common/facts/plugins/fishlim/dh1080.c/dh1080_compute_key.ml
+[7/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/custom-list.c.o'.[K[8/93] Compiling C object 'plugins/checksum/plugins@checksum@@checksum@sha/checksum.c.o'.[K
+Created: /common/facts/plugins/checksum/checksum.c/get_limit.ml
+Created: /common/facts/plugins/checksum/checksum.c/set_limit.ml
+Created: /common/facts/plugins/checksum/checksum.c/check_limit.ml
+Created: /common/facts/plugins/checksum/checksum.c/sha256_from_stream.ml
+Created: /common/facts/plugins/checksum/checksum.c/sha256_from_file.ml
+Created: /common/facts/plugins/checksum/checksum.c/dccoffer_cb.ml
+Created: /common/facts/plugins/checksum/checksum.c/dccrecv_cb.ml
+Created: /common/facts/plugins/checksum/checksum.c/checksum.ml
+Created: /common/facts/plugins/checksum/checksum.c/hexchat_plugin_init.ml
+Created: /common/facts/plugins/checksum/checksum.c/hexchat_plugin_deinit.ml
+[8/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/banlist.c.o'.[K[9/93] Compiling C object 'plugins/fishlim/plugins@fishlim@@fishlim@sha/plugin_hexchat.c.o'.[K
+Created: /common/facts/usr/include/glib-2.0/glib/gstring.h/g_string_append_c_inline.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/handle_incoming.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/handle_setkey.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/find_context_on_network.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/handle_keyx_notice.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/handle_crypt_topic.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/handle_outgoing.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/handle_crypt_me.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/handle_crypt_msg.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/handle_crypt_notice.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/irc_is_query.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/handle_keyx.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/handle_delkey.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/get_config_filename.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/irc_nick_cmp.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/hexchat_plugin_get_info.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/hexchat_plugin_init.ml
+Created: /common/facts/plugins/fishlim/plugin_hexchat.c/hexchat_plugin_deinit.ml
+[9/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/chanview.c.o'.[K[10/93] Generating marshal_h with a meson_exe.py custom command.[K[10/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/hexchat.c.o'.[K[11/93] Generating marshal_c with a meson_exe.py custom command.[K[11/93] Compiling C object 'src/common/dbus/src@common@dbus@@hexchatdbus@sta/meson-generated_.._.._marshal.c.o'.[K[12/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/meson-generated_.._resources.c.o'.[K
+Created: /common/facts/src/fe-gtk/resources.c/hexchat_get_resource.ml
+Created: /common/facts/src/fe-gtk/resources.c/hexchat_unregister_resource.ml
+Created: /common/facts/src/fe-gtk/resources.c/hexchat_register_resource.ml
+[12/93] Compiling C object 'src/common/dbus/src@common@dbus@@hexchatdbus@sta/dbus-plugin.c.o'.[K[13/93] Compiling C object 'src/common/dbus/src@common@dbus@@hexchatdbus@sta/meson-generated_.._.._marshal.c.o'.[K
+Created: /common/facts/src/common/marshal.c/_hexchat_marshal_VOID__OBJECT_OBJECT.ml
+Created: /common/facts/src/common/marshal.c/_hexchat_marshal_VOID__POINTER_POINTER.ml
+Created: /common/facts/src/common/marshal.c/_hexchat_marshal_BOOLEAN__STRING.ml
+Created: /common/facts/src/common/marshal.c/_hexchat_marshal_OBJECT__OBJECT_OBJECT.ml
+Created: /common/facts/src/common/marshal.c/_hexchat_marshal_VOID__POINTER_POINTER_UINT_UINT.ml
+[13/93] Compiling C object 'src/common/dbus/src@common@dbus@@hexchatdbus@sta/dbus-client.c.o'.[K[14/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/custom-list.c.o'.[K
+In file included from [01m[K/usr/include/gtk-2.0/gtk/gtk.h:234:0[m[K,
+                 from [01m[K../src/fe-gtk/custom-list.h:23[m[K,
+                 from [01m[K../src/fe-gtk/custom-list.c:22[m[K:
+[01m[K/usr/include/gtk-2.0/gtk/gtkitemfactory.h:47:1:[m[K [01;35m[Kwarning: [m[Kfunction declaration isn't a prototype [[01;35m[K-Wstrict-prototypes[m[K]
+ [01;35m[Ktypedef[m[K void (*GtkItemFactoryCallback)  ();
+ [01;35m[K^~~~~~~[m[K
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_sortable_init.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_tree_model_init.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_init.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_get_flags.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_get_n_columns.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_iter_has_child.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_iter_parent.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_sortable_set_sort_func.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_sortable_set_default_sort_func.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_sortable_has_default_sort_func.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/fast_ascii_stricmp.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_class_init.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_get_path.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_qsort_compare_func.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_get_type.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_iter_nth_child.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_iter_n_children.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_iter_children.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_iter_next.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_get_value.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_get_iter.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_get_column_type.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_sortable_get_sort_column_id.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_new.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_append.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_resort.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_sortable_set_sort_column_id.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_clear.ml
+Created: /common/facts/src/fe-gtk/custom-list.c/custom_list_finalize.ml
+[14/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/meson-generated_.._marshal.c.o'.[K[15/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/ascii.c.o'.[K
+Created: /common/facts/src/fe-gtk/ascii.c/ascii_enter.ml
+Created: /common/facts/src/fe-gtk/ascii.c/ascii_click.ml
+Created: /common/facts/src/fe-gtk/ascii.c/ascii_open.ml
+[15/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/ctcp.c.o'.[K[16/93] Compiling C object 'plugins/lua/plugins@lua@@lua@sha/lua.c.o'.[K
+Created: /common/facts/plugins/lua/lua.c/destroy_interpreter.ml
+Created: /common/facts/plugins/lua/lua.c/destroy_script.ml
+Created: /common/facts/plugins/lua/lua.c/run_unload_hook.ml
+Created: /common/facts/plugins/lua/lua.c/free_hook.ml
+Created: /common/facts/plugins/lua/lua.c/expand_path.ml
+Created: /common/facts/plugins/lua/lua.c/get_script_by_file.ml
+Created: /common/facts/plugins/lua/lua.c/patch_pairs.ml
+Created: /common/facts/plugins/lua/lua.c/wrap_context.ml
+Created: /common/facts/plugins/lua/lua.c/pairs_closure.ml
+Created: /common/facts/plugins/lua/lua.c/luaopen_hexchat.ml
+Created: /common/facts/plugins/lua/lua.c/prepare_state.ml
+Created: /common/facts/plugins/lua/lua.c/create_script.ml
+Created: /common/facts/plugins/lua/lua.c/create_interpreter.ml
+Created: /common/facts/plugins/lua/lua.c/api_list_meta_gc.ml
+Created: /common/facts/plugins/lua/lua.c/api_list_meta_newindex.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_props_meta_newindex.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_prefs_meta_newindex.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_command.ml
+Created: /common/facts/plugins/lua/lua.c/list_marshal.ml
+Created: /common/facts/plugins/lua/lua.c/api_list_meta_index.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_props_meta_index.ml
+Created: /common/facts/plugins/lua/lua.c/api_attrs_meta_index.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_get_info.ml
+Created: /common/facts/plugins/lua/lua.c/api_attrs_meta_gc.ml
+Created: /common/facts/plugins/lua/lua.c/api_attrs_meta_newindex.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_context_meta_eq.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_iterate.ml
+Created: /common/facts/plugins/lua/lua.c/api_iterate_closure.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_nickcmp.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_emit_print_attrs.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_emit_print.ml
+Created: /common/facts/plugins/lua/lua.c/tostring.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_print.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_find_context.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_set_context.ml
+Created: /common/facts/plugins/lua/lua.c/get_info.ml
+Created: /common/facts/plugins/lua/lua.c/unregister_hook.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_unhook.ml
+Created: /common/facts/plugins/lua/lua.c/register_hook.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_pluginprefs_meta_pairs.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_pluginprefs_meta_pairs_closure.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_pluginprefs_meta_index.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_pluginprefs_meta_newindex.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_prefs_meta_index.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_attrs.ml
+Created: /common/facts/plugins/lua/lua.c/event_attrs_copy.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_get_context.ml
+Created: /common/facts/plugins/lua/lua.c/wrap_context_closure.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_hook_unload.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_hook_timer.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_hook_command.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_hook_server_attrs.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_hook_server.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_hook_print_attrs.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_hook_print.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_strip.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_send_modes.ml
+Created: /common/facts/plugins/lua/lua.c/api_hexchat_register.ml
+Created: /common/facts/plugins/lua/lua.c/run_unload_hooks.ml
+Created: /common/facts/plugins/lua/lua.c/check_deferred.ml
+Created: /common/facts/plugins/lua/lua.c/load_script.ml
+Created: /common/facts/plugins/lua/lua.c/api_timer_closure.ml
+Created: /common/facts/plugins/lua/lua.c/api_server_attrs_closure.ml
+Created: /common/facts/plugins/lua/lua.c/api_server_closure.ml
+Created: /common/facts/plugins/lua/lua.c/api_print_attrs_closure.ml
+Created: /common/facts/plugins/lua/lua.c/api_print_closure.ml
+Created: /common/facts/plugins/lua/lua.c/api_command_closure.ml
+Created: /common/facts/plugins/lua/lua.c/inject_string.ml
+Created: /common/facts/plugins/lua/lua.c/command_console_exec.ml
+Created: /common/facts/plugins/lua/lua.c/unload_script.ml
+Created: /common/facts/plugins/lua/lua.c/command_unload.ml
+Created: /common/facts/plugins/lua/lua.c/reload_script.ml
+Created: /common/facts/plugins/lua/lua.c/command_lua.ml
+Created: /common/facts/plugins/lua/lua.c/command_reload.ml
+Created: /common/facts/plugins/lua/lua.c/is_lua_file.ml
+Created: /common/facts/plugins/lua/lua.c/command_load.ml
+Created: /common/facts/plugins/lua/lua.c/autoload_scripts.ml
+Created: /common/facts/plugins/lua/lua.c/hexchat_plugin_init.ml
+Created: /common/facts/plugins/lua/lua.c/hexchat_plugin_deinit.ml
+[16/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/cfgfiles.c.o'.[K[17/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/meson-generated_.._marshal.c.o'.[K
+/common/facts/src/common/marshal.c/_hexchat_marshal_VOID__OBJECT_OBJECT.ml exists... skipping.
+/common/facts/src/common/marshal.c/_hexchat_marshal_VOID__POINTER_POINTER.ml exists... skipping.
+/common/facts/src/common/marshal.c/_hexchat_marshal_BOOLEAN__STRING.ml exists... skipping.
+/common/facts/src/common/marshal.c/_hexchat_marshal_OBJECT__OBJECT_OBJECT.ml exists... skipping.
+/common/facts/src/common/marshal.c/_hexchat_marshal_VOID__POINTER_POINTER_UINT_UINT.ml exists... skipping.
+[17/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/chanopt.c.o'.[K[18/93] Compiling C object 'src/common/dbus/src@common@dbus@@hexchatdbus@sta/dbus-plugin.c.o'.[K
+Created: /common/facts/src/common/dbus/dbus-plugin.c/context_list_find_id.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_get_context.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/context_list_find_context.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_set_context.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_init.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/list_info_destroy.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/hook_info_destroy.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_class_init.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_class_intern_init.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_finalize.ml
+Created: /common/facts/src/common/dbus/remote-object-glue.h/dbus_glib_marshal_remote_object_VOID__STRING_STRING_STRING_STRING_POINTER.ml
+Created: /common/facts/src/common/dbus/remote-object-glue.h/dbus_glib_marshal_remote_object_BOOLEAN__BOXED_INT_UCHAR_UCHAR_POINTER.ml
+Created: /common/facts/src/common/dbus/remote-object-glue.h/dbus_glib_marshal_remote_object_BOOLEAN__STRING_INT_STRING_INT_POINTER_POINTER.ml
+Created: /common/facts/src/common/dbus/remote-object-glue.h/dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER_POINTER_POINTER_POINTER.ml
+Created: /common/facts/src/common/dbus/remote-object-glue.h/dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER_POINTER.ml
+Created: /common/facts/src/common/dbus/remote-object-glue.h/dbus_glib_marshal_remote_object_BOOLEAN__POINTER_POINTER.ml
+Created: /common/facts/src/common/dbus/remote-object-glue.h/dbus_glib_marshal_remote_object_BOOLEAN__STRING_BOXED_POINTER_POINTER.ml
+Created: /common/facts/src/common/dbus/remote-object-glue.h/dbus_glib_marshal_remote_object_BOOLEAN__STRING_STRING_POINTER_POINTER.ml
+Created: /common/facts/src/common/dbus/remote-object-glue.h/dbus_glib_marshal_remote_object_BOOLEAN__UINT_POINTER.ml
+Created: /common/facts/src/common/dbus/remote-object-glue.h/dbus_glib_marshal_remote_object_BOOLEAN__STRING_INT_INT_POINTER_POINTER.ml
+Created: /common/facts/src/common/dbus/remote-object-glue.h/dbus_glib_marshal_remote_object_BOOLEAN__STRING_POINTER.ml
+Created: /common/facts/src/common/dbus/remote-object-glue.h/dbus_glib_marshal_remote_object_BOOLEAN__UINT_STRING_POINTER_POINTER.ml
+Created: /common/facts/src/common/dbus/remote-object-glue.h/dbus_glib_marshal_remote_object_BOOLEAN__UINT_POINTER_POINTER.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_send_modes.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_strip.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_nickcmp.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_emit_print.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_list_free.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_unhook.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/name_owner_changed.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_list_fields.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_list_time.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_list_int.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_list_str.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/build_list.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_list_next.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_list_get.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_hook_print.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/print_hook_cb.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/server_hook_cb.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/command_hook_cb.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_hook_server.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_hook_command.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_get_prefs.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_get_info.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_find_context.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_print.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_command.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_disconnect.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/unload_plugin_cb.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/close_context_cb.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/open_context_cb.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_get_type.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/remote_object_connect.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/clients_find_filename_foreach.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/init_dbus.ml
+Created: /common/facts/src/common/dbus/dbus-plugin.c/dbus_plugin_init.ml
+[18/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/ignore.c.o'.[K[19/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/hexchat.c.o'.[K
+Created: /common/facts/src/common/hexchat.c/away_check.ml
+Created: /common/facts/src/common/hexchat.c/set_locale.ml
+Created: /common/facts/src/common/hexchat.c/lagcheck_update.ml
+Created: /common/facts/src/common/hexchat.c/hexchat_lag_check_update.ml
+Created: /common/facts/src/common/hexchat.c/session_new.ml
+Created: /common/facts/src/common/hexchat.c/exec_notify_kill.ml
+Created: /common/facts/src/common/hexchat.c/send_quit_or_part.ml
+Created: /common/facts/src/common/hexchat.c/free_sessions.ml
+Created: /common/facts/src/common/hexchat.c/xchat_auto_connect.ml
+Created: /common/facts/src/common/hexchat.c/lastact_update.ml
+Created: /common/facts/src/common/hexchat.c/lastact_getfirst.ml
+Created: /common/facts/src/common/hexchat.c/is_session.ml
+Created: /common/facts/src/common/hexchat.c/find_dialog.ml
+Created: /common/facts/src/common/hexchat.c/find_channel.ml
+Created: /common/facts/src/common/hexchat.c/lag_check.ml
+Created: /common/facts/src/common/hexchat.c/hexchat_lag_check.ml
+Created: /common/facts/src/common/hexchat.c/hexchat_reinit_timers.ml
+Created: /common/facts/src/common/hexchat.c/irc_init.ml
+Created: /common/facts/src/common/hexchat.c/new_ircwindow.ml
+Created: /common/facts/src/common/hexchat.c/xchat_init.ml
+Created: /common/facts/src/common/hexchat.c/hexchat_exit.ml
+Created: /common/facts/src/common/hexchat.c/session_free.ml
+Created: /common/facts/src/common/hexchat.c/hexchat_exec.ml
+Created: /common/facts/src/common/hexchat.c/main.ml
+[19/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/dcc.c.o'.[K[20/93] Compiling C object 'src/common/dbus/src@common@dbus@@hexchatdbus@sta/dbus-client.c.o'.[K
+Created: /common/facts/src/common/dbus/dbus-client.c/new_param_variant.ml
+Created: /common/facts/src/common/dbus/dbus-client.c/write_error.ml
+Created: /common/facts/src/common/dbus/dbus-client.c/hexchat_remote.ml
+[20/93] Linking static target src/common/dbus/libhexchatdbus.a.[K[21/93] Linking static target src/common/dbus/libhexchatdbus.a.[K[21/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/proto-irc.c.o'.[K[22/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/dccgui.c.o'.[K
+Created: /common/facts/src/fe-gtk/dccgui.c/close_dcc_file_window.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_chat_close_cb.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_send_filereq_file.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/browse_folder.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/browse_dcc_folder.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_get_completed.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_completed_transfer_exists.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/update_clear_button_sensitivity.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/clear_completed.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_find_row.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/treeview_get_selected.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_get_selected.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/resume_clicked.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/abort_clicked.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_chat_get_selected.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/abort_chat_clicked.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_chat_row_cb.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/accept_clicked.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_dclick_cb.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/accept_chat_clicked.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_chat_dclick_cb.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_exp_cb.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_details_populate.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_row_cb.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_configure_cb.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_add_column.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_detail_label.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/proper_unit.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_prepare_row_recv.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_update_recv.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_prepare_row_send.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_append.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_fill_window.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_toggle.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_update_send.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_prepare_row_chat.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_chat_append.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_chat_fill_win.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/dcc_update_chat.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/fe_dcc_send_filereq.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/fe_dcc_open_recv_win.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/fe_dcc_open_send_win.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/fe_dcc_open_chat_win.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/fe_dcc_add.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/fe_dcc_update.ml
+Created: /common/facts/src/fe-gtk/dccgui.c/fe_dcc_remove.ml
+[22/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/history.c.o'.[K[23/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/chanlist.c.o'.[K
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_update_buttons.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_match.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_update_caption.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_place_row_in_gui.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_reset_counters.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_flush_pending.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_timeout.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_data_free.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_destroy_widget.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_combo_cb.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_match_topic_button_toggled.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_match_channel_button_toggled.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_maxusers.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_minusers.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_flash.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_get_selected.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_join.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_dclick_cb.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_save.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_filereq_done.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_button_cb.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_copytopic.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_copychannel.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_menu_destroy.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_closegui.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_add_column.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_find_cb.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_do_refresh.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_refresh.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_build_gui_list.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_search_pressed.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/fe_add_chan_list.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/fe_chan_list_end.ml
+Created: /common/facts/src/fe-gtk/chanlist.c/chanlist_opengui.ml
+[23/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/modes.c.o'.[K[24/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/ctcp.c.o'.[K
+Created: /common/facts/src/common/ctcp.c/ctcp_reply.ml
+Created: /common/facts/src/common/ctcp.c/ctcp_check.ml
+Created: /common/facts/src/common/ctcp.c/ctcp_handle.ml
+[24/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/inbound.c.o'.[K[25/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/banlist.c.o'.[K
+Created: /common/facts/src/fe-gtk/banlist.c/supports_bans.ml
+Created: /common/facts/src/fe-gtk/banlist.c/supports_exempt.ml
+Created: /common/facts/src/fe-gtk/banlist.c/supports_invite.ml
+Created: /common/facts/src/fe-gtk/banlist.c/supports_quiet.ml
+Created: /common/facts/src/fe-gtk/banlist.c/get_view.ml
+Created: /common/facts/src/fe-gtk/banlist.c/get_store.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_sensitize.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_strptime.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_date_sort.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_clear.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_closegui.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_add_selected_cb.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_unban_inner.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_treeview_new.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_select_changed.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_button_pressed.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_copyentry.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_do_refresh.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_refresh.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_unban.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_clear_cb.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_crop.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_toggle.ml
+Created: /common/facts/src/fe-gtk/banlist.c/fe_add_ban_list.ml
+Created: /common/facts/src/fe-gtk/banlist.c/fe_ban_list_end.ml
+Created: /common/facts/src/fe-gtk/banlist.c/banlist_opengui.ml
+[25/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/network.c.o'.[K[26/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/history.c.o'.[K
+Created: /common/facts/src/common/history.c/history_add.ml
+Created: /common/facts/src/common/history.c/history_free.ml
+Created: /common/facts/src/common/history.c/history_down.ml
+Created: /common/facts/src/common/history.c/history_up.ml
+[26/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/notify.c.o'.[K[27/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/chanopt.c.o'.[K
+Created: /common/facts/src/common/chanopt.c/chanopt_add_opt.ml
+Created: /common/facts/src/common/chanopt.c/str_to_chanopt.ml
+Created: /common/facts/src/common/chanopt.c/chanopt_value.ml
+Created: /common/facts/src/common/chanopt.c/chanopt_find.ml
+Created: /common/facts/src/common/chanopt.c/chanopt_load_all.ml
+Created: /common/facts/src/common/chanopt.c/chanopt_save_one_channel.ml
+Created: /common/facts/src/common/chanopt.c/chanopt_command.ml
+Created: /common/facts/src/common/chanopt.c/chanopt_is_set.ml
+Created: /common/facts/src/common/chanopt.c/chanopt_load.ml
+Created: /common/facts/src/common/chanopt.c/chanopt_save.ml
+Created: /common/facts/src/common/chanopt.c/chanopt_save_all.ml
+[27/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/outbound.c.o'.[K[28/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/chanview.c.o'.[K
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_sizerequest.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_xclick_cb.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_postinit.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/tab_ignore_cb.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/tab_click_cb.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_is_collapsed.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_get_parent.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_change_orientation.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_remove.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_set_color.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_rename.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_cleanup.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_cleanup.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_get_parent.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_is_collapsed.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_add.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_focus.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/move_row.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_move_family.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_move.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_find_parent.ml
+Created: /common/facts/src/fe-gtk/chanview.c/cv_find_number_of_chan.ml
+Created: /common/facts/src/fe-gtk/chanview.c/cv_find_chan_by_number.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_move_focus.ml
+Created: /common/facts/src/fe-gtk/chanview.c/model_foreach_1.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_populate.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_change_orientation.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_postinit.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_init.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_scroll_event_cb.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_activated_cb.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_click_cb.ml
+Created: /common/facts/src/fe-gtk/chanview-tree.c/cv_tree_sel_cb.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_set_color.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_rename.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/tab_pressed_cb.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_focus.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/tab_toggled_cb.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/tab_focus_num_cb.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_move_family.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_move.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_prune.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_remove.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/tab_group_for_each_tab.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/tab_group_get_cur_page.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_move_focus.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/tab_check_focus_cb.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/tab_add_sorted.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/tab_add_real.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_add.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/tab_search_offset.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/tab_scroll_right_down_clicked.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/tab_scroll_left_up_clicked.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/tab_scroll_cb.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_sizealloc.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/make_sbutton.ml
+Created: /common/facts/src/fe-gtk/chanview-tabs.c/cv_tabs_init.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_pop_cb.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_free_ch.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_destroy_store.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_destroy.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_box_destroy_cb.ml
+Created: /common/facts/src/fe-gtk/chanview.c/truncate_tab_name.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_insert_sorted.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_add_real.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chan_emancipate_children.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_set_impl.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_new.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_set_callbacks.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_add.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_get_size.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_get_box.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_move_focus.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_get_orientation.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chanview_set_orientation.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chan_get_tag.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chan_get_userdata.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chan_focus.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chan_move.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chan_move_family.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chan_set_color.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chan_rename.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chan_remove.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chan_is_collapsed.ml
+Created: /common/facts/src/fe-gtk/chanview.c/chan_get_parent.ml
+[28/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/plugin.c.o'.[K[29/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/ignore.c.o'.[K
+Created: /common/facts/src/common/ignore.c/flood_autodialog_timeout.ml
+Created: /common/facts/src/common/ignore.c/ignore_read_next_entry.ml
+Created: /common/facts/src/common/ignore.c/ignore_exists.ml
+Created: /common/facts/src/common/ignore.c/ignore_add.ml
+Created: /common/facts/src/common/ignore.c/ignore_showlist.ml
+Created: /common/facts/src/common/ignore.c/ignore_del.ml
+Created: /common/facts/src/common/ignore.c/ignore_check.ml
+Created: /common/facts/src/common/ignore.c/ignore_load.ml
+Created: /common/facts/src/common/ignore.c/ignore_save.ml
+Created: /common/facts/src/common/ignore.c/flood_check.ml
+[29/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/plugin-identd.c.o'.[K[30/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/network.c.o'.[K
+Created: /common/facts/usr/include/x86_64-linux-gnu/bits/byteswap.h/__bswap_32.ml
+Created: /common/facts/src/common/network.c/net_set_socket_options.ml
+Created: /common/facts/src/common/network.c/net_ip.ml
+Created: /common/facts/src/common/network.c/net_store_destroy.ml
+Created: /common/facts/src/common/network.c/net_store_new.ml
+Created: /common/facts/src/common/network.c/net_resolve.ml
+Created: /common/facts/src/common/network.c/net_connect.ml
+Created: /common/facts/src/common/network.c/net_bind.ml
+Created: /common/facts/src/common/network.c/net_sockets.ml
+Created: /common/facts/src/common/network.c/udp_sockets.ml
+[30/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/plugin-timer.c.o'.[K[31/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/cfgfiles.c.o'.[K
+Created: /common/facts/src/common/cfgfiles.c/cfg_put_str.ml
+Created: /common/facts/src/common/cfgfiles.c/convert_with_fallback.ml
+Created: /common/facts/src/common/cfgfiles.c/find_language_number.ml
+Created: /common/facts/src/common/cfgfiles.c/get_default_language.ml
+Created: /common/facts/src/common/cfgfiles.c/get_default_spell_languages.ml
+Created: /common/facts/src/common/cfgfiles.c/set_showval.ml
+Created: /common/facts/src/common/cfgfiles.c/set_list.ml
+Created: /common/facts/src/common/cfgfiles.c/list_addentry.ml
+Created: /common/facts/src/common/cfgfiles.c/list_load_from_data.ml
+Created: /common/facts/src/common/cfgfiles.c/list_free.ml
+Created: /common/facts/src/common/cfgfiles.c/list_delentry.ml
+Created: /common/facts/src/common/cfgfiles.c/cfg_get_str.ml
+Created: /common/facts/src/common/cfgfiles.c/cfg_put_color.ml
+Created: /common/facts/src/common/cfgfiles.c/cfg_put_int.ml
+Created: /common/facts/src/common/cfgfiles.c/cfg_get_color.ml
+Created: /common/facts/src/common/cfgfiles.c/cfg_get_int_with_result.ml
+Created: /common/facts/src/common/cfgfiles.c/cfg_get_int.ml
+Created: /common/facts/src/common/cfgfiles.c/get_xdir.ml
+Created: /common/facts/src/common/cfgfiles.c/list_loadconf.ml
+Created: /common/facts/src/common/cfgfiles.c/default_file.ml
+Created: /common/facts/src/common/cfgfiles.c/check_config_dir.ml
+Created: /common/facts/src/common/cfgfiles.c/load_default_config.ml
+Created: /common/facts/src/common/cfgfiles.c/make_config_dirs.ml
+Created: /common/facts/src/common/cfgfiles.c/make_dcc_dirs.ml
+Created: /common/facts/src/common/cfgfiles.c/load_config.ml
+Created: /common/facts/src/common/cfgfiles.c/save_config.ml
+Created: /common/facts/src/common/cfgfiles.c/cfg_get_bool.ml
+Created: /common/facts/src/common/cfgfiles.c/cmd_set.ml
+Created: /common/facts/src/common/cfgfiles.c/hexchat_open_file.ml
+Created: /common/facts/src/common/cfgfiles.c/hexchat_fopen_file.ml
+[31/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/server.c.o'.[K[32/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/plugin-identd.c.o'.[K
+Created: /common/facts/src/common/plugin-identd.c/identd_cleanup_response_cb.ml
+Created: /common/facts/src/common/plugin-identd.c/identd_start_server.ml
+Created: /common/facts/src/common/plugin-identd.c/identd_command_cb.ml
+Created: /common/facts/src/common/plugin-identd.c/identd_incoming_cb.ml
+Created: /common/facts/src/common/plugin-identd.c/ident_info_free.ml
+Created: /common/facts/src/common/plugin-identd.c/identd_read_ready.ml
+Created: /common/facts/src/common/plugin-identd.c/identd_write_ready.ml
+Created: /common/facts/src/common/plugin-identd.c/stream_close_ready.ml
+Created: /common/facts/src/common/plugin-identd.c/identd_plugin_init.ml
+Created: /common/facts/src/common/plugin-identd.c/identd_plugin_deinit.ml
+[32/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/servlist.c.o'.[K[33/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/plugin-timer.c.o'.[K
+Created: /common/facts/src/common/plugin-timer.c/timer_showlist.ml
+Created: /common/facts/src/common/plugin-timer.c/timer_del.ml
+Created: /common/facts/src/common/plugin-timer.c/timer_del_ref.ml
+Created: /common/facts/src/common/plugin-timer.c/timer_add.ml
+Created: /common/facts/src/common/plugin-timer.c/timer_cb.ml
+Created: /common/facts/src/common/plugin-timer.c/timeout_cb.ml
+Created: /common/facts/src/common/plugin-timer.c/timer_plugin_init.ml
+[33/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/text.c.o'.[K[34/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/modes.c.o'.[K
+Created: /common/facts/src/common/modes.c/mode_chanmode_type.ml
+Created: /common/facts/src/common/modes.c/is_prefix_char.ml
+Created: /common/facts/src/common/modes.c/mode_has_arg.ml
+Created: /common/facts/src/common/modes.c/mode_print_grouped.ml
+/common/facts/usr/include/glib-2.0/glib/gstring.h/g_string_append_c_inline.ml exists... skipping.
+Created: /common/facts/src/common/modes.c/record_chan_mode.ml
+Created: /common/facts/src/common/modes.c/mode_cat.ml
+Created: /common/facts/src/common/modes.c/send_channel_modes.ml
+Created: /common/facts/src/common/modes.c/is_channel.ml
+Created: /common/facts/src/common/modes.c/handle_single_mode.ml
+Created: /common/facts/src/common/modes.c/get_nick_prefix.ml
+Created: /common/facts/src/common/modes.c/nick_access.ml
+Created: /common/facts/src/common/modes.c/mode_access.ml
+Created: /common/facts/src/common/modes.c/handle_mode.ml
+Created: /common/facts/src/common/modes.c/inbound_005.ml
+[34/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/tree.c.o'.[K[35/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/notify.c.o'.[K
+Created: /common/facts/src/common/notify.c/notify_do_network.ml
+Created: /common/facts/src/common/notify.c/despacify_dup.ml
+Created: /common/facts/src/common/notify.c/notify_netcmp.ml
+Created: /common/facts/src/common/notify.c/notify_announce_offline.ml
+Created: /common/facts/src/common/notify.c/notify_announce_online.ml
+Created: /common/facts/src/common/notify.c/notify_flush_watches.ml
+Created: /common/facts/src/common/notify.c/notify_checklist_for_server.ml
+Created: /common/facts/src/common/notify.c/notify_watch.ml
+Created: /common/facts/src/common/notify.c/notify_watch_all.ml
+Created: /common/facts/src/common/notify.c/notify_find_server_entry.ml
+Created: /common/facts/src/common/notify.c/notify_find.ml
+Created: /common/facts/src/common/notify.c/notify_save.ml
+Created: /common/facts/src/common/notify.c/notify_set_offline.ml
+Created: /common/facts/src/common/notify.c/notify_set_online.ml
+Created: /common/facts/src/common/notify.c/notify_set_offline_list.ml
+Created: /common/facts/src/common/notify.c/notify_set_online_list.ml
+Created: /common/facts/src/common/notify.c/notify_send_watches.ml
+Created: /common/facts/src/common/notify.c/notify_markonline.ml
+Created: /common/facts/src/common/notify.c/notify_checklist.ml
+Created: /common/facts/src/common/notify.c/notify_showlist.ml
+Created: /common/facts/src/common/notify.c/notify_deluser.ml
+Created: /common/facts/src/common/notify.c/notify_adduser.ml
+Created: /common/facts/src/common/notify.c/notify_load.ml
+Created: /common/facts/src/common/notify.c/notify_is_in_list.ml
+Created: /common/facts/src/common/notify.c/notify_isnotify.ml
+Created: /common/facts/src/common/notify.c/notify_cleanup.ml
+[35/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/url.c.o'.[K[36/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/proto-irc.c.o'.[K
+Created: /common/facts/src/common/proto-irc.c/irc_raw.ml
+Created: /common/facts/src/common/proto-irc.c/irc_set_back.ml
+Created: /common/facts/src/common/proto-irc.c/irc_ping.ml
+Created: /common/facts/src/common/proto-irc.c/irc_names.ml
+Created: /common/facts/src/common/proto-irc.c/irc_change_nick.ml
+Created: /common/facts/src/common/proto-irc.c/irc_list_channels.ml
+Created: /common/facts/src/common/proto-irc.c/irc_topic.ml
+Created: /common/facts/src/common/proto-irc.c/irc_notice.ml
+Created: /common/facts/src/common/proto-irc.c/irc_action.ml
+Created: /common/facts/src/common/proto-irc.c/irc_message.ml
+Created: /common/facts/src/common/proto-irc.c/irc_set_away.ml
+Created: /common/facts/src/common/proto-irc.c/irc_userhost.ml
+Created: /common/facts/src/common/proto-irc.c/irc_user_whois.ml
+Created: /common/facts/src/common/proto-irc.c/irc_away_status.ml
+Created: /common/facts/src/common/proto-irc.c/irc_user_list.ml
+Created: /common/facts/src/common/proto-irc.c/irc_mode.ml
+Created: /common/facts/src/common/proto-irc.c/irc_join_info.ml
+Created: /common/facts/src/common/proto-irc.c/irc_login.ml
+Created: /common/facts/src/common/proto-irc.c/irc_join.ml
+Created: /common/facts/src/common/proto-irc.c/irc_nickserv.ml
+Created: /common/facts/src/common/proto-irc.c/irc_ns_ghost.ml
+Created: /common/facts/src/common/proto-irc.c/irc_ns_identify.ml
+Created: /common/facts/src/common/proto-irc.c/irc_part.ml
+Created: /common/facts/src/common/proto-irc.c/irc_kick.ml
+Created: /common/facts/src/common/proto-irc.c/irc_quit.ml
+Created: /common/facts/src/common/proto-irc.c/irc_nctcp.ml
+Created: /common/facts/src/common/proto-irc.c/irc_ctcp.ml
+Created: /common/facts/src/common/proto-irc.c/irc_cycle.ml
+Created: /common/facts/src/common/proto-irc.c/irc_invite.ml
+/common/facts/usr/include/glib-2.0/glib/gstring.h/g_string_append_c_inline.ml exists... skipping.
+Created: /common/facts/src/common/proto-irc.c/irc_join_list_flush.ml
+Created: /common/facts/src/common/proto-irc.c/irc_join_list.ml
+Created: /common/facts/src/common/proto-irc.c/get_timezone.ml
+Created: /common/facts/src/common/proto-irc.c/handle_message_tag_time.ml
+Created: /common/facts/src/common/proto-irc.c/handle_message_tags.ml
+Created: /common/facts/src/common/proto-irc.c/process_named_servermsg.ml
+Created: /common/facts/src/common/proto-irc.c/channel_date.ml
+Created: /common/facts/src/common/proto-irc.c/process_numeric.ml
+Created: /common/facts/src/common/proto-irc.c/process_named_msg.ml
+Created: /common/facts/src/common/proto-irc.c/irc_inline.ml
+Created: /common/facts/src/common/proto-irc.c/proto_fill_her_up.ml
+[36/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/userlist.c.o'.[K[37/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/tree.c.o'.[K
+Created: /common/facts/src/common/tree.c/tree_find_insertion_pos.ml
+Created: /common/facts/src/common/tree.c/mybsearch.ml
+Created: /common/facts/src/common/tree.c/tree_insert_at_pos.ml
+Created: /common/facts/src/common/tree.c/tree_grow.ml
+Created: /common/facts/src/common/tree.c/tree_new.ml
+Created: /common/facts/src/common/tree.c/tree_destroy.ml
+Created: /common/facts/src/common/tree.c/tree_find.ml
+Created: /common/facts/src/common/tree.c/tree_remove_at_pos.ml
+Created: /common/facts/src/common/tree.c/tree_remove.ml
+Created: /common/facts/src/common/tree.c/tree_foreach.ml
+Created: /common/facts/src/common/tree.c/tree_insert.ml
+Created: /common/facts/src/common/tree.c/tree_append.ml
+Created: /common/facts/src/common/tree.c/tree_size.ml
+[37/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/ssl.c.o'.[K[38/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/dcc.c.o'.[K
+Created: /common/facts/src/common/dcc.c/timeval_diff.ml
+Created: /common/facts/src/common/dcc.c/dcc_remove_from_sum.ml
+Created: /common/facts/src/common/dcc.c/find_dcc_from_id.ml
+Created: /common/facts/src/common/dcc.c/find_dcc_from_port.ml
+Created: /common/facts/src/common/dcc.c/dcc_malformed.ml
+Created: /common/facts/src/common/dcc.c/dcc_close.ml
+Created: /common/facts/src/common/dcc.c/write_proxy.ml
+Created: /common/facts/src/common/dcc.c/dcc_calc_average_cps.ml
+Created: /common/facts/src/common/dcc.c/new_dcc.ml
+Created: /common/facts/src/common/dcc.c/read_proxy.ml
+Created: /common/facts/src/common/dcc.c/proxy_read_line.ml
+/common/facts/usr/include/x86_64-linux-gnu/bits/byteswap.h/__bswap_32.ml exists... skipping.
+Created: /common/facts/src/common/dcc.c/dcc_send_ack.ml
+Created: /common/facts/src/common/dcc.c/dcc_read.ml
+Created: /common/facts/src/common/dcc.c/dcc_send_data.ml
+Created: /common/facts/src/common/dcc.c/dcc_unthrottle.ml
+Created: /common/facts/src/common/dcc.c/dcc_calc_cps.ml
+Created: /common/facts/src/common/dcc.c/dcc_check_timeouts.ml
+Created: /common/facts/src/common/dcc.c/dcc_handle_new_ack.ml
+Created: /common/facts/src/common/dcc.c/dcc_read_ack.ml
+Created: /common/facts/src/common/dcc.c/dcc_chat_line.ml
+Created: /common/facts/src/common/dcc.c/dcc_read_chat.ml
+Created: /common/facts/src/common/dcc.c/dcc_did_connect.ml
+Created: /common/facts/src/common/dcc.c/dcc_open_query.ml
+Created: /common/facts/src/common/dcc.c/dcc_connect_finished.ml
+Created: /common/facts/src/common/dcc.c/dcc_accept.ml
+Created: /common/facts/src/common/dcc.c/dcc_wingate_proxy_traverse.ml
+Created: /common/facts/src/common/dcc.c/new_id.ml
+Created: /common/facts/src/common/dcc.c/dcc_socks_proxy_traverse.ml
+Created: /common/facts/src/common/dcc.c/dcc_socks5_proxy_traverse.ml
+Created: /common/facts/src/common/dcc.c/dcc_http_proxy_traverse.ml
+Created: /common/facts/src/common/dcc.c/dcc_proxy_connect.ml
+Created: /common/facts/src/common/dcc.c/dcc_lookup_proxy.ml
+Created: /common/facts/src/common/dcc.c/dcc_connect_sok.ml
+Created: /common/facts/src/common/dcc.c/is_same_file.ml
+Created: /common/facts/src/common/dcc.c/update_is_resumable.ml
+Created: /common/facts/src/common/dcc.c/is_dcc.ml
+Created: /common/facts/src/common/dcc.c/is_dcc_completed.ml
+Created: /common/facts/src/common/dcc.c/dcc_abort.ml
+Created: /common/facts/src/common/dcc.c/dcc_deny_chat.ml
+Created: /common/facts/src/common/dcc.c/dcc_deny_send.ml
+Created: /common/facts/src/common/dcc.c/dcc_notify_kill.ml
+Created: /common/facts/src/common/dcc.c/dcc_get_my_address.ml
+Created: /common/facts/src/common/dcc.c/dcc_listen_init.ml
+Created: /common/facts/src/common/dcc.c/dcc_connect.ml
+Created: /common/facts/src/common/dcc.c/dcc_add_chat.ml
+Created: /common/facts/src/common/dcc.c/dcc_confirm_chat.ml
+Created: /common/facts/src/common/dcc.c/dcc_send.ml
+Created: /common/facts/src/common/dcc.c/dcc_send_wild.ml
+Created: /common/facts/src/common/dcc.c/find_dcc.ml
+Created: /common/facts/src/common/dcc.c/dcc_write_chat.ml
+Created: /common/facts/src/common/dcc.c/dcc_change_nick.ml
+Created: /common/facts/src/common/dcc.c/dcc_chat.ml
+Created: /common/facts/src/common/dcc.c/dcc_resume.ml
+Created: /common/facts/src/common/dcc.c/dcc_get.ml
+Created: /common/facts/src/common/dcc.c/dcc_get_with_destfile.ml
+Created: /common/facts/src/common/dcc.c/dcc_add_file.ml
+Created: /common/facts/src/common/dcc.c/dcc_confirm_send.ml
+Created: /common/facts/src/common/dcc.c/dcc_get_nick.ml
+Created: /common/facts/src/common/dcc.c/handle_dcc.ml
+Created: /common/facts/src/common/dcc.c/dcc_show_list.ml
+[38/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/util.c.o'.[K[39/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/servlist.c.o'.[K
+Created: /common/facts/src/common/servlist.c/servlist_favchan_copy.ml
+Created: /common/facts/src/common/servlist.c/joinlist_find_chan.ml
+Created: /common/facts/src/common/servlist.c/servlist_command_free.ml
+Created: /common/facts/src/common/servlist.c/servlist_favchan_free.ml
+Created: /common/facts/src/common/servlist.c/free_and_clear.ml
+Created: /common/facts/src/common/servlist.c/servlist_connect.ml
+Created: /common/facts/src/common/servlist.c/servlist_cycle_cb.ml
+Created: /common/facts/src/common/servlist.c/servlist_connect_by_netname.ml
+Created: /common/facts/src/common/servlist.c/servlist_have_auto.ml
+Created: /common/facts/src/common/servlist.c/servlist_auto_connect.ml
+Created: /common/facts/src/common/servlist.c/servlist_cycle.ml
+Created: /common/facts/src/common/servlist.c/servlist_server_find.ml
+Created: /common/facts/src/common/servlist.c/servlist_favchan_find.ml
+Created: /common/facts/src/common/servlist.c/servlist_command_find.ml
+Created: /common/facts/src/common/servlist.c/servlist_net_find_from_server.ml
+Created: /common/facts/src/common/servlist.c/servlist_net_find.ml
+Created: /common/facts/src/common/servlist.c/servlist_server_add.ml
+Created: /common/facts/src/common/servlist.c/servlist_command_add.ml
+Created: /common/facts/src/common/servlist.c/servlist_favchan_listadd.ml
+Created: /common/facts/src/common/servlist.c/servlist_favchan_add.ml
+Created: /common/facts/src/common/servlist.c/servlist_server_remove.ml
+Created: /common/facts/src/common/servlist.c/servlist_server_remove_all.ml
+Created: /common/facts/src/common/servlist.c/servlist_command_remove.ml
+Created: /common/facts/src/common/servlist.c/servlist_favchan_remove.ml
+Created: /common/facts/src/common/servlist.c/servlist_cleanup.ml
+Created: /common/facts/src/common/servlist.c/servlist_net_remove.ml
+Created: /common/facts/src/common/servlist.c/servlist_net_add.ml
+Created: /common/facts/src/common/servlist.c/servlist_load_defaults.ml
+Created: /common/facts/src/common/servlist.c/servlist_check_encoding.ml
+Created: /common/facts/src/common/servlist.c/servlist_load.ml
+Created: /common/facts/src/common/servlist.c/servlist_init.ml
+Created: /common/facts/src/common/servlist.c/servlist_save.ml
+Created: /common/facts/src/common/servlist.c/joinlist_is_in_list.ml
+[39/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/fkeys.c.o'.[K[40/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/inbound.c.o'.[K
+Created: /common/facts/src/common/inbound.c/find_unused_session.ml
+Created: /common/facts/src/common/inbound.c/find_session_from_waitchannel.ml
+Created: /common/facts/src/common/inbound.c/find_session_from_type.ml
+Created: /common/facts/src/common/inbound.c/inbound_nickserv_login.ml
+Created: /common/facts/src/common/inbound.c/find_session_from_nick.ml
+Created: /common/facts/src/common/inbound.c/inbound_open_dialog.ml
+Created: /common/facts/src/common/inbound.c/inbound_make_idtext.ml
+Created: /common/facts/src/common/inbound.c/get_supported_mech.ml
+Created: /common/facts/src/common/inbound.c/inbound_set_all_away_status.ml
+Created: /common/facts/src/common/inbound.c/dns_name_callback.ml
+Created: /common/facts/src/common/inbound.c/dns_addr_callback.ml
+Created: /common/facts/src/common/inbound.c/set_default_modes.ml
+Created: /common/facts/src/common/inbound.c/inbound_exec_eom_cmd.ml
+Created: /common/facts/src/common/inbound.c/check_autojoin_channels.ml
+Created: /common/facts/src/common/inbound.c/inbound_toggle_caps.ml
+Created: /common/facts/src/common/inbound.c/clear_channel.ml
+Created: /common/facts/src/common/inbound.c/set_topic.ml
+Created: /common/facts/src/common/inbound.c/alert_match_word.ml
+Created: /common/facts/src/common/inbound.c/alert_match_text.ml
+Created: /common/facts/src/common/inbound.c/is_hilight.ml
+Created: /common/facts/src/common/inbound.c/inbound_action.ml
+Created: /common/facts/src/common/inbound.c/inbound_chanmsg.ml
+Created: /common/facts/src/common/inbound.c/inbound_privmsg.ml
+Created: /common/facts/src/common/inbound.c/inbound_newnick.ml
+Created: /common/facts/src/common/inbound.c/inbound_ujoin.ml
+Created: /common/facts/src/common/inbound.c/inbound_ukick.ml
+Created: /common/facts/src/common/inbound.c/inbound_upart.ml
+Created: /common/facts/src/common/inbound.c/inbound_nameslist.ml
+Created: /common/facts/src/common/inbound.c/inbound_topic.ml
+Created: /common/facts/src/common/inbound.c/inbound_topicnew.ml
+Created: /common/facts/src/common/inbound.c/inbound_join.ml
+Created: /common/facts/src/common/inbound.c/inbound_kick.ml
+Created: /common/facts/src/common/inbound.c/inbound_part.ml
+Created: /common/facts/src/common/inbound.c/inbound_topictime.ml
+Created: /common/facts/src/common/inbound.c/inbound_quit.ml
+Created: /common/facts/src/common/inbound.c/inbound_account.ml
+Created: /common/facts/src/common/inbound.c/inbound_ping_reply.ml
+Created: /common/facts/src/common/inbound.c/inbound_notice.ml
+Created: /common/facts/src/common/inbound.c/inbound_away.ml
+Created: /common/facts/src/common/inbound.c/inbound_away_notify.ml
+Created: /common/facts/src/common/inbound.c/inbound_nameslist_end.ml
+Created: /common/facts/src/common/inbound.c/inbound_next_nick.ml
+Created: /common/facts/src/common/inbound.c/do_dns.ml
+Created: /common/facts/src/common/inbound.c/inbound_login_start.ml
+Created: /common/facts/src/common/inbound.c/inbound_uaway.ml
+Created: /common/facts/src/common/inbound.c/inbound_uback.ml
+Created: /common/facts/src/common/inbound.c/inbound_foundip.ml
+Created: /common/facts/src/common/inbound.c/inbound_user_info_start.ml
+Created: /common/facts/src/common/inbound.c/inbound_user_info.ml
+Created: /common/facts/src/common/inbound.c/inbound_banlist.ml
+Created: /common/facts/src/common/inbound.c/inbound_login_end.ml
+Created: /common/facts/src/common/inbound.c/inbound_identified.ml
+Created: /common/facts/src/common/inbound.c/inbound_cap_ack.ml
+Created: /common/facts/src/common/inbound.c/inbound_cap_del.ml
+Created: /common/facts/src/common/inbound.c/inbound_cap_ls.ml
+Created: /common/facts/src/common/inbound.c/inbound_cap_nak.ml
+Created: /common/facts/src/common/inbound.c/inbound_cap_list.ml
+Created: /common/facts/src/common/inbound.c/inbound_sasl_authenticate.ml
+Created: /common/facts/src/common/inbound.c/inbound_sasl_error.ml
+[40/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/editlist.c.o'.[K[41/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/url.c.o'.[K
+Created: /common/facts/src/common/url.c/url_free.ml
+Created: /common/facts/src/common/url.c/url_save_cb.ml
+Created: /common/facts/src/common/url.c/url_save_node.ml
+Created: /common/facts/src/common/url.c/make_re.ml
+Created: /common/facts/src/common/url.c/re_nick.ml
+Created: /common/facts/src/common/url.c/re_path.ml
+Created: /common/facts/src/common/url.c/re_host.ml
+Created: /common/facts/src/common/url.c/re_host6.ml
+Created: /common/facts/src/common/url.c/re_channel.ml
+Created: /common/facts/src/common/url.c/re_email.ml
+Created: /common/facts/src/common/url.c/re_url_no_scheme.ml
+Created: /common/facts/src/common/url.c/regex_match.ml
+Created: /common/facts/src/common/url.c/match_nick.ml
+Created: /common/facts/src/common/url.c/match_path.ml
+Created: /common/facts/src/common/url.c/match_host.ml
+Created: /common/facts/src/common/url.c/match_host6.ml
+Created: /common/facts/src/common/url.c/match_channel.ml
+Created: /common/facts/src/common/url.c/match_email.ml
+Created: /common/facts/src/common/url.c/re_url.ml
+Created: /common/facts/src/common/url.c/match_url.ml
+Created: /common/facts/src/common/url.c/url_find.ml
+Created: /common/facts/src/common/url.c/url_add.ml
+Created: /common/facts/src/common/url.c/url_clear.ml
+Created: /common/facts/src/common/url.c/url_save_tree.ml
+Created: /common/facts/src/common/url.c/url_check_word.ml
+Created: /common/facts/src/common/url.c/url_check_line.ml
+Created: /common/facts/src/common/url.c/url_last.ml
+[41/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/fe-gtk.c.o'.[K[42/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/userlist.c.o'.[K
+Created: /common/facts/src/common/userlist.c/nick_cmp_alpha.ml
+Created: /common/facts/src/common/userlist.c/find_cmp.ml
+Created: /common/facts/src/common/userlist.c/update_counts.ml
+Created: /common/facts/src/common/userlist.c/rehash_cb.ml
+Created: /common/facts/src/common/userlist.c/free_user.ml
+Created: /common/facts/src/common/userlist.c/userlist_insertname.ml
+Created: /common/facts/src/common/userlist.c/flat_cb.ml
+Created: /common/facts/src/common/userlist.c/double_cb.ml
+Created: /common/facts/src/common/userlist.c/nick_cmp_az_ops.ml
+Created: /common/facts/src/common/userlist.c/userlist_free.ml
+Created: /common/facts/src/common/userlist.c/userlist_clear.ml
+Created: /common/facts/src/common/userlist.c/userlist_find.ml
+Created: /common/facts/src/common/userlist.c/userlist_set_away.ml
+Created: /common/facts/src/common/userlist.c/userlist_set_account.ml
+Created: /common/facts/src/common/userlist.c/userlist_add_hostname.ml
+Created: /common/facts/src/common/userlist.c/userlist_find_global.ml
+Created: /common/facts/src/common/userlist.c/userlist_update_mode.ml
+Created: /common/facts/src/common/userlist.c/userlist_change.ml
+Created: /common/facts/src/common/userlist.c/userlist_remove_user.ml
+Created: /common/facts/src/common/userlist.c/userlist_remove.ml
+Created: /common/facts/src/common/userlist.c/userlist_add.ml
+Created: /common/facts/src/common/userlist.c/userlist_rehash.ml
+Created: /common/facts/src/common/userlist.c/userlist_flat_list.ml
+Created: /common/facts/src/common/userlist.c/userlist_double_list.ml
+[42/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/gtkutil.c.o'.[K[43/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/plugin.c.o'.[K
+Created: /common/facts/src/common/plugin.c/hexchat_dummy.ml
+Created: /common/facts/src/common/plugin.c/hexchat_nickcmp.ml
+Created: /common/facts/src/common/plugin.c/hexchat_get_context.ml
+Created: /common/facts/src/common/plugin.c/plugin_list_add.ml
+Created: /common/facts/src/common/plugin.c/hexchat_plugingui_add.ml
+Created: /common/facts/src/common/plugin.c/hexchat_event_attrs_free.ml
+Created: /common/facts/src/common/plugin.c/hexchat_free.ml
+Created: /common/facts/src/common/plugin.c/plugin_hook_find.ml
+Created: /common/facts/src/common/plugin.c/plugin_hook_run.ml
+Created: /common/facts/src/common/plugin.c/hexchat_gettext.ml
+Created: /common/facts/src/common/plugin.c/plugin_get_libdir.ml
+Created: /common/facts/src/common/plugin.c/hexchat_event_attrs_create.ml
+Created: /common/facts/src/common/plugin.c/hexchat_list_free.ml
+Created: /common/facts/src/common/plugin.c/hexchat_unhook.ml
+Created: /common/facts/src/common/plugin.c/plugin_free.ml
+Created: /common/facts/src/common/plugin.c/hexchat_plugingui_remove.ml
+Created: /common/facts/src/common/plugin.c/plugin_timeout_cb.ml
+Created: /common/facts/src/common/plugin.c/plugin_fd_cb.ml
+Created: /common/facts/src/common/plugin.c/plugin_insert_hook.ml
+Created: /common/facts/src/common/plugin.c/plugin_add_hook.ml
+Created: /common/facts/src/common/plugin.c/hexchat_hook_command.ml
+Created: /common/facts/src/common/plugin.c/hexchat_hook_server.ml
+Created: /common/facts/src/common/plugin.c/hexchat_hook_server_attrs.ml
+Created: /common/facts/src/common/plugin.c/hexchat_hook_print.ml
+Created: /common/facts/src/common/plugin.c/hexchat_hook_print_attrs.ml
+Created: /common/facts/src/common/plugin.c/hexchat_hook_timer.ml
+Created: /common/facts/src/common/plugin.c/hexchat_hook_fd.ml
+Created: /common/facts/src/common/plugin.c/hexchat_print.ml
+Created: /common/facts/src/common/plugin.c/hexchat_set_context.ml
+Created: /common/facts/src/common/plugin.c/hexchat_printf.ml
+Created: /common/facts/src/common/plugin.c/hexchat_command.ml
+Created: /common/facts/src/common/plugin.c/hexchat_commandf.ml
+Created: /common/facts/src/common/plugin.c/hexchat_list_fields.ml
+Created: /common/facts/src/common/plugin.c/hexchat_list_time.ml
+Created: /common/facts/src/common/plugin.c/hexchat_list_str.ml
+Created: /common/facts/src/common/plugin.c/hexchat_list_int.ml
+Created: /common/facts/src/common/plugin.c/hexchat_get_info.ml
+Created: /common/facts/src/common/plugin.c/hexchat_get_prefs.ml
+Created: /common/facts/src/common/plugin.c/hexchat_list_get.ml
+Created: /common/facts/src/common/plugin.c/hexchat_list_next.ml
+Created: /common/facts/src/common/plugin.c/hexchat_emit_print.ml
+Created: /common/facts/src/common/plugin.c/hexchat_emit_print_attrs.ml
+Created: /common/facts/src/common/plugin.c/hexchat_send_modes.ml
+Created: /common/facts/src/common/plugin.c/hexchat_strip.ml
+Created: /common/facts/src/common/plugin.c/hexchat_pluginpref_set_str_real.ml
+Created: /common/facts/src/common/plugin.c/hexchat_pluginpref_set_str.ml
+Created: /common/facts/src/common/plugin.c/hexchat_pluginpref_delete.ml
+Created: /common/facts/src/common/plugin.c/hexchat_pluginpref_get_str_real.ml
+Created: /common/facts/src/common/plugin.c/hexchat_pluginpref_get_str.ml
+Created: /common/facts/src/common/plugin.c/hexchat_pluginpref_get_int.ml
+Created: /common/facts/src/common/plugin.c/hexchat_pluginpref_set_int.ml
+Created: /common/facts/src/common/plugin.c/hexchat_pluginpref_list.ml
+Created: /common/facts/src/common/plugin.c/plugin_add.ml
+Created: /common/facts/src/common/plugin.c/plugin_kill.ml
+Created: /common/facts/src/common/plugin.c/plugin_kill_all.ml
+Created: /common/facts/src/common/plugin.c/module_load.ml
+Created: /common/facts/src/common/plugin.c/plugin_load.ml
+Created: /common/facts/src/common/plugin.c/plugin_auto_load_cb.ml
+Created: /common/facts/src/common/plugin.c/plugin_auto_load.ml
+Created: /common/facts/src/common/plugin.c/plugin_reload.ml
+Created: /common/facts/src/common/plugin.c/plugin_emit_command.ml
+Created: /common/facts/src/common/plugin.c/plugin_emit_server.ml
+Created: /common/facts/src/common/plugin.c/plugin_emit_print.ml
+Created: /common/facts/src/common/plugin.c/plugin_emit_dummy_print.ml
+Created: /common/facts/src/common/plugin.c/plugin_emit_keypress.ml
+Created: /common/facts/src/common/plugin.c/plugin_command_list.ml
+Created: /common/facts/src/common/plugin.c/plugin_command_foreach.ml
+Created: /common/facts/src/common/plugin.c/plugin_show_help.ml
+Created: /common/facts/src/common/plugin.c/plugin_find_context.ml
+Created: /common/facts/src/common/plugin.c/hexchat_find_context.ml
+[43/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/ignoregui.c.o'.[K[44/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/server.c.o'.[K
+Created: /common/facts/src/common/server.c/ssl_cb_info.ml
+Created: /common/facts/src/common/server.c/three_to_four.ml
+Created: /common/facts/src/common/server.c/server_away_free_messages.ml
+Created: /common/facts/src/common/server.c/server_flush_queue.ml
+Created: /common/facts/src/common/server.c/close_socket_cb.ml
+Created: /common/facts/src/common/server.c/server_stopconnecting.ml
+Created: /common/facts/src/common/server.c/close_socket.ml
+Created: /common/facts/src/common/server.c/server_cleanup.ml
+Created: /common/facts/src/common/server.c/server_disconnect.ml
+Created: /common/facts/src/common/server.c/auto_reconnect.ml
+Created: /common/facts/src/common/server.c/traverse_wingate.ml
+Created: /common/facts/src/common/server.c/ssl_cb_verify.ml
+Created: /common/facts/src/common/server.c/server_inline.ml
+Created: /common/facts/src/common/server.c/server_read.ml
+Created: /common/facts/src/common/server.c/proxy_error.ml
+Created: /common/facts/src/common/server.c/http_read_line.ml
+Created: /common/facts/src/common/server.c/traverse_socks.ml
+Created: /common/facts/src/common/server.c/traverse_socks5.ml
+Created: /common/facts/src/common/server.c/tcp_send_real.ml
+Created: /common/facts/src/common/server.c/server_send_real.ml
+Created: /common/facts/src/common/server.c/base64_encode.ml
+Created: /common/facts/src/common/server.c/traverse_http.ml
+Created: /common/facts/src/common/server.c/traverse_proxy.ml
+Created: /common/facts/src/common/server.c/server_child.ml
+Created: /common/facts/src/common/server.c/server_fill_her_up.ml
+Created: /common/facts/src/common/server.c/server_set_encoding.ml
+Created: /common/facts/src/common/server.c/is_server.ml
+Created: /common/facts/src/common/server.c/tcp_send_queue.ml
+Created: /common/facts/src/common/server.c/tcp_send_len.ml
+Created: /common/facts/src/common/server.c/tcp_sendf.ml
+Created: /common/facts/src/common/server.c/server_set_defaults.ml
+Created: /common/facts/src/common/server.c/server_new.ml
+Created: /common/facts/src/common/server.c/server_get_network.ml
+Created: /common/facts/src/common/server.c/server_connect.ml
+Created: /common/facts/src/common/server.c/timeout_auto_reconnect.ml
+Created: /common/facts/src/common/server.c/server_set_name.ml
+Created: /common/facts/src/common/server.c/server_connected.ml
+Created: /common/facts/src/common/server.c/server_connect_success.ml
+Created: /common/facts/src/common/server.c/server_read_child.ml
+Created: /common/facts/src/common/server.c/ssl_do_connect.ml
+Created: /common/facts/src/common/server.c/server_away_find_message.ml
+Created: /common/facts/src/common/server.c/server_away_save_message.ml
+Created: /common/facts/src/common/server.c/server_free.ml
+[44/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/joind.c.o'.[K[45/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/ssl.c.o'.[K
+Created: /common/facts/usr/include/openssl/ssl.h/sk_SSL_COMP_zero.ml
+Created: /common/facts/src/common/ssl.c/broke_oneline.ml
+Created: /common/facts/src/common/ssl.c/ASN1_TIME_snprintf.ml
+Created: /common/facts/src/common/ssl.c/__SSL_fill_err_buf.ml
+Created: /common/facts/src/common/ssl.c/__SSL_critical_error.ml
+Created: /common/facts/usr/include/openssl/x509v3.h/sk_GENERAL_NAME_num.ml
+Created: /common/facts/usr/include/openssl/x509v3.h/sk_GENERAL_NAME_value.ml
+Created: /common/facts/src/common/ssl.c/_SSL_match_hostname.ml
+Created: /common/facts/usr/include/openssl/x509v3.h/sk_GENERAL_NAME_pop_free.ml
+Created: /common/facts/src/common/ssl.c/_SSL_check_subject_altname.ml
+Created: /common/facts/src/common/ssl.c/_SSL_check_common_name.ml
+Created: /common/facts/src/common/ssl.c/_SSL_context_init.ml
+Created: /common/facts/src/common/ssl.c/_SSL_get_cert_info.ml
+Created: /common/facts/src/common/ssl.c/_SSL_get_cipher_info.ml
+Created: /common/facts/src/common/ssl.c/_SSL_send.ml
+Created: /common/facts/src/common/ssl.c/_SSL_recv.ml
+Created: /common/facts/src/common/ssl.c/_SSL_socket.ml
+Created: /common/facts/src/common/ssl.c/_SSL_set_verify.ml
+Created: /common/facts/src/common/ssl.c/_SSL_close.ml
+Created: /common/facts/src/common/ssl.c/_SSL_check_hostname.ml
+[45/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/menu.c.o'.[K[46/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/text.c.o'.[K
+Created: /common/facts/src/common/text.c/log_escape_strcpy.ml
+Created: /common/facts/src/common/text.c/log_insert_vars.ml
+Created: /common/facts/src/common/text.c/mkdir_p.ml
+Created: /common/facts/src/common/text.c/log_create_filename.ml
+Created: /common/facts/src/common/text.c/scrollback_get_filename.ml
+Created: /common/facts/src/common/text.c/pevent_trigger_load.ml
+Created: /common/facts/src/common/text.c/pevent_load_defaults.ml
+Created: /common/facts/src/common/text.c/pevent_check_all_loaded.ml
+Created: /common/facts/src/common/text.c/log_create_pathname.ml
+Created: /common/facts/src/common/text.c/log_open_file.ml
+Created: /common/facts/src/common/text.c/scrollback_shrink.ml
+Created: /common/facts/src/common/text.c/scrollback_save.ml
+Created: /common/facts/src/common/text.c/pevent_find.ml
+Created: /common/facts/src/common/text.c/sound_load_event.ml
+Created: /common/facts/src/common/text.c/scrollback_close.ml
+Created: /common/facts/src/common/text.c/scrollback_load.ml
+Created: /common/facts/src/common/text.c/log_close.ml
+Created: /common/facts/src/common/text.c/log_open.ml
+Created: /common/facts/src/common/text.c/log_open_or_close.ml
+Created: /common/facts/src/common/text.c/get_stamp_str.ml
+Created: /common/facts/src/common/text.c/log_write.ml
+Created: /common/facts/src/common/text.c/text_convert_invalid.ml
+Created: /common/facts/src/common/text.c/text_fixup_invalid_utf8.ml
+Created: /common/facts/src/common/text.c/PrintTextTimeStamp.ml
+Created: /common/facts/src/common/text.c/PrintText.ml
+Created: /common/facts/src/common/text.c/PrintTextf.ml
+Created: /common/facts/src/common/text.c/PrintTextTimeStampf.ml
+Created: /common/facts/src/common/text.c/pevent_load.ml
+Created: /common/facts/src/common/text.c/format_event.ml
+Created: /common/facts/src/common/text.c/display_event.ml
+Created: /common/facts/src/common/text.c/pevt_build_string.ml
+Created: /common/facts/src/common/text.c/pevent_make_pntevts.ml
+Created: /common/facts/src/common/text.c/load_text_events.ml
+Created: /common/facts/src/common/text.c/text_color_of.ml
+Created: /common/facts/src/common/text.c/text_find_format_string.ml
+Created: /common/facts/src/common/text.c/pevent_save.ml
+Created: /common/facts/src/common/text.c/sound_play.ml
+Created: /common/facts/src/common/text.c/sound_play_event.ml
+Created: /common/facts/src/common/text.c/sound_beep.ml
+Created: /common/facts/src/common/text.c/text_emit.ml
+Created: /common/facts/src/common/text.c/text_emit_by_name.ml
+Created: /common/facts/src/common/text.c/sound_load.ml
+Created: /common/facts/src/common/text.c/sound_save.ml
+[46/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/maingui.c.o'.[K[47/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/editlist.c.o'.[K
+Created: /common/facts/src/fe-gtk/editlist.c/editlist_close.ml
+Created: /common/facts/src/fe-gtk/editlist.c/get_store.ml
+Created: /common/facts/src/fe-gtk/editlist.c/editlist_save.ml
+Created: /common/facts/src/fe-gtk/editlist.c/editlist_delete.ml
+Created: /common/facts/src/fe-gtk/editlist.c/editlist_add.ml
+Created: /common/facts/src/fe-gtk/editlist.c/editlist_treeview_new.ml
+Created: /common/facts/src/fe-gtk/editlist.c/editlist_edited.ml
+Created: /common/facts/src/fe-gtk/editlist.c/editlist_load.ml
+Created: /common/facts/src/fe-gtk/editlist.c/editlist_keypress.ml
+Created: /common/facts/src/fe-gtk/editlist.c/editlist_gui_open.ml
+[47/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/palette.c.o'.[K[48/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/util.c.o'.[K
+Created: /common/facts/src/common/util.c/country_compare.ml
+Created: /common/facts/src/common/util.c/file_exists.ml
+Created: /common/facts/src/common/util.c/copy_file.ml
+Created: /common/facts/src/common/util.c/rfc_strlower.ml
+Created: /common/facts/src/common/util.c/str_sha256hash.ml
+Created: /common/facts/src/common/util.c/file_part.ml
+Created: /common/facts/src/common/util.c/nocasestrstr.ml
+Created: /common/facts/src/common/util.c/errorstring.ml
+Created: /common/facts/src/common/util.c/waitline.ml
+Created: /common/facts/src/common/util.c/get_cpu_info.ml
+Created: /common/facts/src/common/util.c/expand_homedir.ml
+Created: /common/facts/src/common/util.c/strip_color2.ml
+Created: /common/facts/src/common/util.c/strip_color.ml
+Created: /common/facts/src/common/util.c/strip_hidden_attribute.ml
+Created: /common/facts/src/common/util.c/get_sys_str.ml
+Created: /common/facts/src/common/util.c/buf_get_line.ml
+Created: /common/facts/src/common/util.c/match.ml
+Created: /common/facts/src/common/util.c/for_files.ml
+Created: /common/facts/src/common/util.c/country.ml
+Created: /common/facts/src/common/util.c/country_search.ml
+Created: /common/facts/src/common/util.c/util_exec.ml
+Created: /common/facts/src/common/util.c/make_ping_time.ml
+Created: /common/facts/src/common/util.c/rfc_casecmp.ml
+Created: /common/facts/src/common/util.c/rfc_ncasecmp.ml
+Created: /common/facts/src/common/util.c/move_file.ml
+Created: /common/facts/src/common/util.c/token_foreach.ml
+Created: /common/facts/src/common/util.c/str_hash.ml
+Created: /common/facts/src/common/util.c/str_ihash.ml
+Created: /common/facts/src/common/util.c/safe_strcpy.ml
+Created: /common/facts/src/common/util.c/path_part.ml
+Created: /common/facts/src/common/util.c/canonalize_key.ml
+Created: /common/facts/src/common/util.c/portable_mode.ml
+Created: /common/facts/src/common/util.c/encode_sasl_pass_plain.ml
+Created: /common/facts/src/common/util.c/challengeauth_response.ml
+Created: /common/facts/src/common/util.c/strftime_validated.ml
+Created: /common/facts/src/common/util.c/strftime_utf8.ml
+[48/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/notifygui.c.o'.[K[49/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/ignoregui.c.o'.[K
+Created: /common/facts/src/fe-gtk/ignoregui.c/ignore_clear_entry_clicked.ml
+Created: /common/facts/src/fe-gtk/ignoregui.c/ignore_get_flags.ml
+Created: /common/facts/src/fe-gtk/ignoregui.c/get_store.ml
+Created: /common/facts/src/fe-gtk/ignoregui.c/ignore_clear_cb.ml
+Created: /common/facts/src/fe-gtk/ignoregui.c/ignore_delete_entry_clicked.ml
+Created: /common/facts/src/fe-gtk/ignoregui.c/ignore_new_entry_clicked.ml
+Created: /common/facts/src/fe-gtk/ignoregui.c/ignore_store_new.ml
+Created: /common/facts/src/fe-gtk/ignoregui.c/close_ignore_gui_callback.ml
+Created: /common/facts/src/fe-gtk/ignoregui.c/ignore_treeview_new.ml
+Created: /common/facts/src/fe-gtk/ignoregui.c/mask_edited.ml
+Created: /common/facts/src/fe-gtk/ignoregui.c/option_toggled.ml
+Created: /common/facts/src/fe-gtk/ignoregui.c/ignore_stats_entry.ml
+Created: /common/facts/src/fe-gtk/ignoregui.c/ignore_gui_open.ml
+Created: /common/facts/src/fe-gtk/ignoregui.c/fe_ignore_update.ml
+[49/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/pixmaps.c.o'.[K[50/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/joind.c.o'.[K
+Created: /common/facts/src/fe-gtk/joind.c/joind_entryfocus_cb.ml
+Created: /common/facts/src/fe-gtk/joind.c/joind_entryenter_cb.ml
+Created: /common/facts/src/fe-gtk/joind.c/joind_show_dialog.ml
+Created: /common/facts/src/fe-gtk/joind.c/joind_destroy_cb.ml
+Created: /common/facts/src/fe-gtk/joind.c/joind_ok_cb.ml
+Created: /common/facts/src/fe-gtk/joind.c/joind_radio2_cb.ml
+Created: /common/facts/src/fe-gtk/joind.c/joind_open.ml
+Created: /common/facts/src/fe-gtk/joind.c/joind_close.ml
+[50/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/plugin-tray.c.o'.[K[51/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/fe-gtk.c.o'.[K
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_idle.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_update_mode_entry.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/dcc_saveas_cb.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_open_url_inner.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_args.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_main.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_cleanup.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_exit.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_timeout_add.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_timeout_add_seconds.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_timeout_remove.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_new_window.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_new_server.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_message.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/create_input_style.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_init.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_idle_add.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_input_remove.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_input_add.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_set_topic.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_update_channel_key.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_update_channel_limit.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_is_chanwindow.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_notify_update.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_text_clear.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_close_window.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_progressbar_start.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_progressbar_end.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_print_text.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_beep.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_lastlog.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_set_lag.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_set_throttle.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_ctrl_gui.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_confirm.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_gui_info.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_gui_info_ptr.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_get_inputbox_contents.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_get_inputbox_cursor.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_set_inputbox_cursor.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_set_inputbox_contents.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_open_url.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_server_event.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_get_file.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_open_chan_list.ml
+Created: /common/facts/src/fe-gtk/fe-gtk.c/fe_get_default_font.ml
+[51/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/plugin-notification.c.o'.[K[52/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/fkeys.c.o'.[K
+Created: /common/facts/src/fe-gtk/fkeys.c/key_modifier_get_valid.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/session_check_is_tab.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/gcomp_nick_func.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/talked_recent_cmp.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_free.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_load_kbs_helper_mod.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_get_action_from_string.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_load_kbs.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_put_history.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_move_tab_family_right.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_move_tab_family_left.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_move_tab_right.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_move_tab_left.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/replace_handle.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_replace.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_set_buffer.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/offset_to_len.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/len_to_offset.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/double_cmd_cb.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/double_chan_cb.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/cmdlist_double_list.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/chanlist_double_list.ml
+/common/facts/usr/include/glib-2.0/glib/gstring.h/g_string_append_c_inline.ml exists... skipping.
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_history_down.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_history_up.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_scroll_page.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_page_switch.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_handle_command.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/get_store.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_save_kbs.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_dialog_delete.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_dialog_add.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_dialog_close.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_dialog_save.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_dialog_treeview_new.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_dialog_print_text.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_dialog_combo_changed.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_dialog_entry_edited.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_dialog_set_key.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_dialog_load.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_dialog_selection_changed.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_dialog_keypress.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_insert.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_init.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_dialog_show.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_tab_clean.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_tab_comp.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_action_comp_chng.ml
+Created: /common/facts/src/fe-gtk/fkeys.c/key_handle_key_press.ml
+[52/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/rawlog.c.o'.[K[53/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/palette.c.o'.[K
+Created: /common/facts/src/fe-gtk/palette.c/palette_alloc.ml
+Created: /common/facts/src/fe-gtk/palette.c/palette_load.ml
+Created: /common/facts/src/fe-gtk/palette.c/palette_save.ml
+[53/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/sexy-spell-entry.c.o'.[K[54/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/notifygui.c.o'.[K
+Created: /common/facts/src/fe-gtk/notifygui.c/notify_row_cb.ml
+Created: /common/facts/src/fe-gtk/notifygui.c/notifygui_add_cb.ml
+Created: /common/facts/src/fe-gtk/notifygui.c/notifygui_add_enter.ml
+Created: /common/facts/src/fe-gtk/notifygui.c/notify_opendialog_clicked.ml
+Created: /common/facts/src/fe-gtk/notifygui.c/notify_remove_clicked.ml
+Created: /common/facts/src/fe-gtk/notifygui.c/notify_closegui.ml
+Created: /common/facts/src/fe-gtk/notifygui.c/notify_treeview_new.ml
+Created: /common/facts/src/fe-gtk/notifygui.c/notify_treecell_property_mapper.ml
+Created: /common/facts/src/fe-gtk/notifygui.c/notify_gui_update.ml
+Created: /common/facts/src/fe-gtk/notifygui.c/fe_notify_ask.ml
+Created: /common/facts/src/fe-gtk/notifygui.c/notify_add_clicked.ml
+Created: /common/facts/src/fe-gtk/notifygui.c/notify_opengui.ml
+[54/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/servlistgui.c.o'.[K[55/93] Compiling C object 'src/common/src@common@@hexchatcommon@sta/outbound.c.o'.[K
+Created: /common/facts/src/common/outbound.c/mdehop_cb.ml
+Created: /common/facts/src/common/outbound.c/mdeop_cb.ml
+Created: /common/facts/src/common/outbound.c/mhop_cb.ml
+Created: /common/facts/src/common/outbound.c/mkick_cb.ml
+Created: /common/facts/src/common/outbound.c/mkickops_cb.ml
+Created: /common/facts/src/common/outbound.c/cmd_discon.ml
+Created: /common/facts/src/common/outbound.c/cmd_quit.ml
+Created: /common/facts/src/common/outbound.c/cmd_ghost.ml
+Created: /common/facts/src/common/outbound.c/cmd_id.ml
+Created: /common/facts/src/common/outbound.c/cmd_invite.ml
+Created: /common/facts/src/common/outbound.c/cmd_kick.ml
+Created: /common/facts/src/common/outbound.c/mop_cb.ml
+Created: /common/facts/src/common/outbound.c/cmd_names.ml
+Created: /common/facts/src/common/outbound.c/cmd_nctcp.ml
+Created: /common/facts/src/common/outbound.c/cmd_quote.ml
+Created: /common/facts/src/common/outbound.c/find_server_from_net.ml
+Created: /common/facts/src/common/outbound.c/find_internal_command.ml
+Created: /common/facts/src/common/outbound.c/notj_msg.ml
+Created: /common/facts/src/common/outbound.c/cmd_echo.ml
+Created: /common/facts/src/common/outbound.c/menu_free.ml
+Created: /common/facts/src/common/outbound.c/cmd_back.ml
+Created: /common/facts/src/common/outbound.c/random_line.ml
+Created: /common/facts/src/common/outbound.c/cmd_recv.ml
+Created: /common/facts/src/common/outbound.c/cmd_userlist.ml
+Created: /common/facts/src/common/outbound.c/cmd_mkick.ml
+Created: /common/facts/src/common/outbound.c/cmd_wallchop.ml
+Created: /common/facts/src/common/outbound.c/cmd_flushq.ml
+Created: /common/facts/src/common/outbound.c/cmd_debug.ml
+Created: /common/facts/src/common/outbound.c/wallchop_cb.ml
+Created: /common/facts/src/common/outbound.c/cmd_wallchan.ml
+Created: /common/facts/src/common/outbound.c/cmd_voice.ml
+Created: /common/facts/src/common/outbound.c/cmd_unquiet.ml
+Created: /common/facts/src/common/outbound.c/cmd_unban.ml
+Created: /common/facts/src/common/outbound.c/cmd_op.ml
+Created: /common/facts/src/common/outbound.c/cmd_hop.ml
+Created: /common/facts/src/common/outbound.c/cmd_devoice.ml
+Created: /common/facts/src/common/outbound.c/cmd_deop.ml
+Created: /common/facts/src/common/outbound.c/cmd_dehop.ml
+Created: /common/facts/src/common/outbound.c/userlist_cb.ml
+Created: /common/facts/src/common/outbound.c/cmd_away.ml
+Created: /common/facts/src/common/outbound.c/menu_entry_find.ml
+Created: /common/facts/src/common/outbound.c/cmd_uselect.ml
+Created: /common/facts/src/common/outbound.c/find_server_from_hostname.ml
+Created: /common/facts/src/common/outbound.c/command_compare.ml
+Created: /common/facts/src/common/outbound.c/parse_irc_url.ml
+Created: /common/facts/src/common/outbound.c/url_join_only.ml
+Created: /common/facts/src/common/outbound.c/cmd_reconnect.ml
+Created: /common/facts/src/common/outbound.c/cmd_unload.ml
+Created: /common/facts/src/common/outbound.c/usercommand_show_help.ml
+Created: /common/facts/src/common/outbound.c/cmd_unignore.ml
+Created: /common/facts/src/common/outbound.c/cmd_tray.ml
+Created: /common/facts/src/common/outbound.c/cmd_topic.ml
+Created: /common/facts/src/common/outbound.c/cmd_splay.ml
+Created: /common/facts/src/common/outbound.c/cmd_settext.ml
+Created: /common/facts/src/common/outbound.c/perform_nick_completion.ml
+Created: /common/facts/src/common/outbound.c/cmd_settab.ml
+Created: /common/facts/src/common/outbound.c/cmd_setcursor.ml
+Created: /common/facts/src/common/outbound.c/cmd_server.ml
+Created: /common/facts/src/common/outbound.c/cmd_servchan.ml
+Created: /common/facts/src/common/outbound.c/cmd_newserver.ml
+Created: /common/facts/src/common/outbound.c/cmd_url.ml
+/common/facts/usr/include/x86_64-linux-gnu/bits/byteswap.h/__bswap_32.ml exists... skipping.
+Created: /common/facts/src/common/outbound.c/lastlog.ml
+Created: /common/facts/src/common/outbound.c/cmd_lastlog.ml
+Created: /common/facts/src/common/outbound.c/nick_comp_cb.ml
+Created: /common/facts/src/common/outbound.c/cmd_reload.ml
+Created: /common/facts/src/common/outbound.c/create_mask.ml
+Created: /common/facts/src/common/outbound.c/cmd_quiet.ml
+Created: /common/facts/src/common/outbound.c/ban.ml
+Created: /common/facts/src/common/outbound.c/cmd_ban.ml
+Created: /common/facts/src/common/outbound.c/cmd_ping.ml
+Created: /common/facts/src/common/outbound.c/cmd_notify.ml
+Created: /common/facts/src/common/outbound.c/cmd_nick.ml
+Created: /common/facts/src/common/outbound.c/cmd_join.ml
+Created: /common/facts/src/common/outbound.c/cmd_cycle.ml
+Created: /common/facts/src/common/outbound.c/cmd_mop.ml
+Created: /common/facts/src/common/outbound.c/cmd_mhop.ml
+Created: /common/facts/src/common/outbound.c/cmd_mdeop.ml
+Created: /common/facts/src/common/outbound.c/cmd_mdehop.ml
+Created: /common/facts/src/common/outbound.c/cmd_mode.ml
+Created: /common/facts/src/common/outbound.c/menu_is_mainmenu_root.ml
+Created: /common/facts/src/common/outbound.c/menu_add.ml
+Created: /common/facts/src/common/outbound.c/cmd_list.ml
+Created: /common/facts/src/common/outbound.c/cmd_lagcheck.ml
+Created: /common/facts/src/common/outbound.c/cmd_killall.ml
+Created: /common/facts/src/common/outbound.c/cmd_kickban.ml
+Created: /common/facts/src/common/outbound.c/exec_handle_colors.ml
+Created: /common/facts/src/common/outbound.c/cmd_ignore.ml
+Created: /common/facts/src/common/outbound.c/help.ml
+Created: /common/facts/src/common/outbound.c/show_help_line.ml
+Created: /common/facts/src/common/outbound.c/cmd_help.ml
+Created: /common/facts/src/common/outbound.c/cmd_ctcp.ml
+Created: /common/facts/src/common/outbound.c/cmd_gui.ml
+Created: /common/facts/src/common/outbound.c/cmd_getstr.ml
+Created: /common/facts/src/common/outbound.c/cmd_getint.ml
+Created: /common/facts/src/common/outbound.c/cmd_getfile.ml
+Created: /common/facts/src/common/outbound.c/cmd_getbool.ml
+Created: /common/facts/src/common/outbound.c/cmd_gate.ml
+Created: /common/facts/src/common/outbound.c/exec_check_process.ml
+Created: /common/facts/src/common/outbound.c/cmd_execw.ml
+Created: /common/facts/src/common/outbound.c/cmd_execs.ml
+Created: /common/facts/src/common/outbound.c/cmd_execk.ml
+Created: /common/facts/src/common/outbound.c/cmd_execc.ml
+Created: /common/facts/src/common/outbound.c/cmd_exec.ml
+Created: /common/facts/src/common/outbound.c/cmd_dns.ml
+Created: /common/facts/src/common/outbound.c/cmd_delbutton.ml
+Created: /common/facts/src/common/outbound.c/cmd_dcc.ml
+Created: /common/facts/src/common/outbound.c/cmd_country.ml
+Created: /common/facts/src/common/outbound.c/cmd_close.ml
+Created: /common/facts/src/common/outbound.c/cmd_clear.ml
+Created: /common/facts/src/common/outbound.c/cmd_charset.ml
+Created: /common/facts/src/common/outbound.c/cmd_chanopt.ml
+Created: /common/facts/src/common/outbound.c/cmd_addserver.ml
+Created: /common/facts/src/common/outbound.c/cmd_addbutton.ml
+Created: /common/facts/src/common/outbound.c/notc_msg.ml
+Created: /common/facts/src/common/outbound.c/server_sendpart.ml
+Created: /common/facts/src/common/outbound.c/cmd_part.ml
+Created: /common/facts/src/common/outbound.c/process_data_init.ml
+Created: /common/facts/src/common/outbound.c/menu_streq.ml
+Created: /common/facts/src/common/outbound.c/menu_del_children.ml
+Created: /common/facts/src/common/outbound.c/menu_del.ml
+Created: /common/facts/src/common/outbound.c/cmd_menu.ml
+Created: /common/facts/src/common/outbound.c/split_up_text.ml
+Created: /common/facts/src/common/outbound.c/cmd_notice.ml
+Created: /common/facts/src/common/outbound.c/cmd_msg.ml
+Created: /common/facts/src/common/outbound.c/cmd_me.ml
+Created: /common/facts/src/common/outbound.c/open_query.ml
+Created: /common/facts/src/common/outbound.c/cmd_query.ml
+Created: /common/facts/src/common/outbound.c/auto_insert.ml
+Created: /common/facts/src/common/outbound.c/check_special_chars.ml
+Created: /common/facts/src/common/outbound.c/server_sendquit.ml
+Created: /common/facts/src/common/outbound.c/handle_say.ml
+Created: /common/facts/src/common/outbound.c/cmd_say.ml
+Created: /common/facts/src/common/outbound.c/command_insert_vars.ml
+Created: /common/facts/src/common/outbound.c/handle_command.ml
+Created: /common/facts/src/common/outbound.c/load_perform_file.ml
+Created: /common/facts/src/common/outbound.c/cmd_load.ml
+Created: /common/facts/src/common/outbound.c/cmd_send.ml
+Created: /common/facts/src/common/outbound.c/get_str_cb.ml
+Created: /common/facts/src/common/outbound.c/get_int_cb.ml
+Created: /common/facts/src/common/outbound.c/get_file_cb.ml
+Created: /common/facts/src/common/outbound.c/get_bool_cb.ml
+Created: /common/facts/src/common/outbound.c/cmd_doat.ml
+Created: /common/facts/src/common/outbound.c/cmd_allservers.ml
+Created: /common/facts/src/common/outbound.c/cmd_allchannelslocal.ml
+Created: /common/facts/src/common/outbound.c/cmd_allchannels.ml
+Created: /common/facts/src/common/outbound.c/user_command.ml
+Created: /common/facts/src/common/outbound.c/handle_user_input.ml
+Created: /common/facts/src/common/outbound.c/handle_multiline.ml
+Created: /common/facts/src/common/outbound.c/exec_print_line.ml
+Created: /common/facts/src/common/outbound.c/exec_data.ml
+[55/93] Linking static target src/common/libhexchatcommon.a.[K[56/93] Linking static target src/common/libhexchatcommon.a.[K[56/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/setup.c.o'.[K[57/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/plugin-notification.c.o'.[K
+Created: /common/facts/src/fe-gtk/plugin-notification.c/should_alert.ml
+Created: /common/facts/src/fe-gtk/plugin-notification.c/show_notification.ml
+Created: /common/facts/src/fe-gtk/plugin-notification.c/tray_cmd_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-notification.c/is_ignored.ml
+Created: /common/facts/src/fe-gtk/plugin-notification.c/show_notificationf.ml
+Created: /common/facts/src/fe-gtk/plugin-notification.c/incoming_priv_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-notification.c/incoming_message_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-notification.c/incoming_hilight_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-notification.c/notification_plugin_init.ml
+Created: /common/facts/src/fe-gtk/plugin-notification.c/notification_plugin_deinit.ml
+[57/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/textgui.c.o'.[K[58/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/pixmaps.c.o'.[K
+Created: /common/facts/src/fe-gtk/pixmaps.c/pixmap_load_from_file_real.ml
+Created: /common/facts/src/fe-gtk/pixmaps.c/load_pixmap.ml
+Created: /common/facts/src/fe-gtk/pixmaps.c/pixmap_load_from_file.ml
+Created: /common/facts/src/fe-gtk/pixmaps.c/pixmaps_init.ml
+[58/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/urlgrab.c.o'.[K[59/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/rawlog.c.o'.[K
+Created: /common/facts/src/fe-gtk/rawlog.c/rawlog_key_cb.ml
+Created: /common/facts/src/fe-gtk/rawlog.c/rawlog_savebutton.ml
+Created: /common/facts/src/fe-gtk/rawlog.c/rawlog_save.ml
+Created: /common/facts/src/fe-gtk/rawlog.c/rawlog_clearbutton.ml
+Created: /common/facts/src/fe-gtk/rawlog.c/close_rawlog.ml
+Created: /common/facts/src/fe-gtk/rawlog.c/open_rawlog.ml
+Created: /common/facts/src/fe-gtk/rawlog.c/fe_add_rawlog.ml
+[59/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/userlistgui.c.o'.[K[60/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/plugin-tray.c.o'.[K
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_count_channels.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_count_networks.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_reset_counts.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_find_away_status.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_timeout_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_get_window_status.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_init.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_menu_notify_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_menu_settings.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_foreach_server.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_menu_quit_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_menu_destroy.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/blink_item.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_toggle_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_make_item.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_menu_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/fe_tray_set_tooltip.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_set_tipf.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_stop_flash.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_set_flash.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_cleanup.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_menu_try_restore.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_focus_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_dcc_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_priv.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_invited_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_priv_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_message_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_hilight_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_toggle_visibility.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_menu_restore_cb.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_apply_setup.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/fe_tray_set_flash.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/fe_tray_set_icon.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/fe_tray_set_file.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_plugin_init.ml
+Created: /common/facts/src/fe-gtk/plugin-tray.c/tray_plugin_deinit.ml
+[60/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/xtext.c.o'.[K[61/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/gtkutil.c.o'.[K
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_file_req_destroy.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_check_file.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_file_req_done.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_file_req_response.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_esc_destroy.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_get_str_response.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_get_bool_response.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_str_enter.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_get_number_response.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_file_req.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_destroy_on_esc.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_destroy.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/fe_get_str.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/fe_get_int.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/fe_get_bool.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_button.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_label_new.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_entry_new.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/show_and_unfocus.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_set_icon.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_window_new.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_copy_to_clipboard.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_treeview_new.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_treemodel_string_to_iter.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_treeview_get_selected.ml
+Created: /common/facts/src/fe-gtk/gtkutil.c/gtkutil_tray_icon_supported.ml
+[61/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/plugingui.c.o'.[K[62/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/textgui.c.o'.[K
+Created: /common/facts/src/fe-gtk/textgui.c/PrintTextLine.ml
+Created: /common/facts/src/fe-gtk/textgui.c/pevent_ok_cb.ml
+Created: /common/facts/src/fe-gtk/textgui.c/pevent_load_cb.ml
+Created: /common/facts/src/fe-gtk/textgui.c/pevent_save_cb.ml
+Created: /common/facts/src/fe-gtk/textgui.c/pevent_save_req_cb.ml
+Created: /common/facts/src/fe-gtk/textgui.c/pevent_dialog_close.ml
+Created: /common/facts/src/fe-gtk/textgui.c/pevent_treeview_new.ml
+Created: /common/facts/src/fe-gtk/textgui.c/pevent_dialog_hfill.ml
+Created: /common/facts/src/fe-gtk/textgui.c/pevent_selection_changed.ml
+Created: /common/facts/src/fe-gtk/textgui.c/pevent_dialog_fill.ml
+Created: /common/facts/src/fe-gtk/textgui.c/pevent_load_req_cb.ml
+Created: /common/facts/src/fe-gtk/textgui.c/pevent_hlist_treeview_new.ml
+Created: /common/facts/src/fe-gtk/textgui.c/xtext_get_stamp_str.ml
+Created: /common/facts/src/fe-gtk/textgui.c/PrintTextRaw.ml
+Created: /common/facts/src/fe-gtk/textgui.c/pevent_test_cb.ml
+Created: /common/facts/src/fe-gtk/textgui.c/pevent_edited.ml
+Created: /common/facts/src/fe-gtk/textgui.c/pevent_dialog_show.ml
+[62/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/notifications_notification-libnotify.c.o'.[K[63/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/urlgrab.c.o'.[K
+Created: /common/facts/src/fe-gtk/urlgrab.c/url_closegui.ml
+Created: /common/facts/src/fe-gtk/urlgrab.c/url_button_save.ml
+Created: /common/facts/src/fe-gtk/urlgrab.c/url_save_callback.ml
+Created: /common/facts/src/fe-gtk/urlgrab.c/url_button_copy.ml
+Created: /common/facts/src/fe-gtk/urlgrab.c/url_button_clear.ml
+Created: /common/facts/src/fe-gtk/urlgrab.c/url_treeview_new.ml
+Created: /common/facts/src/fe-gtk/urlgrab.c/url_treeview_url_clicked_cb.ml
+Created: /common/facts/src/fe-gtk/urlgrab.c/fe_url_add.ml
+Created: /common/facts/src/fe-gtk/urlgrab.c/populate_cb.ml
+Created: /common/facts/src/fe-gtk/urlgrab.c/url_opengui.ml
+[63/93] Linking target plugins/checksum/checksum.so.[K[64/93] Linking target plugins/checksum/checksum.so.[K[64/93] Compiling C object 'plugins/fishlim/plugins@fishlim@@fishlim@sha/fish.c.o'.[K[65/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/userlistgui.c.o'.[K
+Created: /common/facts/src/fe-gtk/userlistgui.c/find_row.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/scroll_to_iter.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_alpha_cmp.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_ops_cmp.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_key_cb.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_dnd_leave.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_dnd_motion.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_dnd_drop.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_add_columns.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/get_user_icon.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/fe_userlist_numbers.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_select.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_selection_list.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_click_cb.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/fe_userlist_set_selected.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_set_value.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_get_value.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/fe_userlist_remove.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/fe_userlist_rehash.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/fe_userlist_insert.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/fe_userlist_clear.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_create_model.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_create.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/userlist_show.ml
+Created: /common/facts/src/fe-gtk/userlistgui.c/fe_uselect.ml
+[65/93] Linking target plugins/lua/lua.so.[K[66/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/sexy-spell-entry.c.o'.[K
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_editable_init.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/insert_hiddenchar.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/get_lang_from_dict.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/get_word_extents_from_position.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/entry_strsplit_utf8.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/insert_bold.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/insert_italic.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/insert_underline.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/insert_color.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/insert_reset.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/check_attributes.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/word_misspelled.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/insert_underline_error.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/check_word.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_recheck_all.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/ignore_all.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/add_to_dictionary.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/build_suggestion_menu.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_popup_menu.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/replace_word.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/get_lang_from_dict_cb.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_destroy.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/spell_accumulator.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/gtk_entry_find_position.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/default_word_check.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/initialize_enchant.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_class_init.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_class_intern_init.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/enchant_has_lang.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/dict_describe_cb.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_get_type.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_changed.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_button_press.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_expose.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_finalize.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_new.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_error_quark.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_activate_language_internal.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_get_languages.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_activate_default_languages.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_init.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_get_language_name.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/build_spelling_menu.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_populate_popup.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_language_is_active.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_activate_language.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_deactivate_language.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_set_active_languages.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_get_active_languages.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_is_checked.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_set_checked.ml
+Created: /common/facts/src/fe-gtk/sexy-spell-entry.c/sexy_spell_entry_set_parse_attributes.ml
+[66/93] Generating hexchat-perl-header with a custom command.[K[67/93] Generating hexchat-perl-header with a custom command.[K[67/93] Generating irc-perl-header with a custom command.[K[68/93] Linking target plugins/lua/lua.so.[K[68/93] Compiling C object 'plugins/sysinfo/plugins@sysinfo@@sysinfo@sha/format.c.o'.[K[69/93] Generating irc-perl-header with a custom command.[K[69/93] Compiling C object 'plugins/perl/plugins@perl@@perl@sha/perl.c.o'.[K[70/93] Compiling C object 'plugins/fishlim/plugins@fishlim@@fishlim@sha/fish.c.o'.[K
+Created: /common/facts/plugins/fishlim/fish.c/fish_encrypt.ml
+Created: /common/facts/plugins/fishlim/fish.c/fish_decrypt.ml
+Created: /common/facts/plugins/fishlim/fish.c/fish_encrypt_for_nick.ml
+Created: /common/facts/plugins/fishlim/fish.c/fish_decrypt_from_nick.ml
+[70/93] Linking target plugins/fishlim/fishlim.so.[K[71/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/notifications_notification-libnotify.c.o'.[K
+Created: /common/facts/src/fe-gtk/notifications/notification-libnotify.c/notification_backend_show.ml
+Created: /common/facts/src/fe-gtk/notifications/notification-libnotify.c/notification_backend_init.ml
+Created: /common/facts/src/fe-gtk/notifications/notification-libnotify.c/notification_backend_deinit.ml
+Created: /common/facts/src/fe-gtk/notifications/notification-libnotify.c/notification_backend_supported.ml
+[71/93] Compiling C object 'plugins/sysinfo/plugins@sysinfo@@sysinfo@sha/sysinfo.c.o'.[K[72/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/servlistgui.c.o'.[K
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_get_login_desc_index.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_edit_tabswitch_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_has_selection.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_move_item.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_net_keypress_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_find_selected_net.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_network_row_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_channel_row_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_configure_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_edit_configure_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_savegui.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_delete_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_create_entry.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_connect_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_close_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_favor.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_compare.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_update_from_entry.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_edit_update.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_edit_close_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_editwin_delete_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_sanitize_command.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_combo_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_toggle_global_user.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_keypress_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_start_editing.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_editbutton_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_server_row_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_deletechannel.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_deletechannel_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_deleteserver.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_deleteserver_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_command_row_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_deletecommand.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_deletecommand_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_deletebutton_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_select_and_show.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_addserver.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_addchannel.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_addcommand.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_addbutton_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_get_iter_from_name.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_editcommand_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_editkey_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_editchannel_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_sanitize_hostname.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_editserver_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_create_check.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_check_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/no_servlist.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_create_logintypecombo.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_logintypecombo_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_create_charsetcombo.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_open_edit.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_servers_populate.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_channels_populate.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_commands_populate.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_edit_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_deletenet_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_deletenetwork.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_deletenetdialog_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_celledit_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_addnet_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/bold_label.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_nick_changed_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_username_changed_cb.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_open_networks.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_networks_populate_.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_networks_populate.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_sort.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/fav_servlist.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/servlist_autojoinedit.ml
+Created: /common/facts/src/fe-gtk/servlistgui.c/fe_serverlist_open.ml
+[72/93] Compiling C object 'plugins/sysinfo/plugins@sysinfo@@sysinfo@sha/shared_df.c.o'.[K[73/93] Linking target plugins/fishlim/fishlim.so.[K[73/93] Compiling C object 'plugins/python/plugins@python@@python@sha/python.c.o'.[K[74/93] Compiling C object 'plugins/sysinfo/plugins@sysinfo@@sysinfo@sha/format.c.o'.[K
+Created: /common/facts/plugins/sysinfo/format.c/sysinfo_format_uptime.ml
+Created: /common/facts/plugins/sysinfo/format.c/sysinfo_format_memory.ml
+Created: /common/facts/plugins/sysinfo/format.c/sysinfo_format_disk.ml
+[74/93] Compiling C object 'plugins/sysinfo/plugins@sysinfo@@sysinfo@sha/unix_match.c.o'.[K[75/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/maingui.c.o'.[K
+Created: /common/facts/src/fe-gtk/maingui.c/mg_inputbox_focus.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_is_userlist_and_tree_combined.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_count_networks.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_count_dccs.ml
+Created: /common/facts/src/fe-gtk/maingui.c/check_is_number.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_sanitize_positions.ml
+Created: /common/facts/src/fe-gtk/maingui.c/set_window_urgency.ml
+Created: /common/facts/src/fe-gtk/maingui.c/flash_window.ml
+Created: /common/facts/src/fe-gtk/maingui.c/unflash_window.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_set_myself_away.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_inputbox_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_key_entry_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_progressbar_update.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_hide_empty_pane.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_hide_empty_boxes.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_userlist_showhide.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_add_pane_signals.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_tab_close_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_ircdestroy.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_tabwindow_kill_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_topdestroy_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_topic_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/flagk_hit.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_change_flag.ml
+Created: /common/facts/src/fe-gtk/maingui.c/is_child_of.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_restore_speller.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_restore_entry.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_restore_label.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_chan_remove.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_changui_destroy.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_close_gen.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_limit_entry_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/flagl_hit.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_infoframe.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_meters.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_place_userlist_and_chanview_real.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_place_userlist_and_chanview.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_menu_destroy.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_search_toggle.ml
+Created: /common/facts/src/fe-gtk/maingui.c/search_handle_esc.ml
+Created: /common/facts/src/fe-gtk/maingui.c/search_handle_event.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_search_handle_previous.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_search_handle_next.ml
+Created: /common/facts/src/fe-gtk/maingui.c/search_handle_refresh.ml
+Created: /common/facts/src/fe-gtk/maingui.c/search_handle_change.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_attr_list_create.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_tab_colors.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_dialog_button.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_dialogbuttons.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_userlist_button.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_userlistbuttons.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_dialog_button_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_change_nick.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_configure_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_topwin_focus_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_tabwin_focus_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_userlist.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_apply_entry_style.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_flagbutton.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_chanmodebuttons.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_topicbar.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_flagbutton_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_word_check.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_spellcheck_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_search.ml
+Created: /common/facts/src/fe-gtk/maingui.c/search_set_option.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_entry.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_markup_item.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_color_insert.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_nickclick_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_vpane_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_leftpane_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_rightpane_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_menu.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_windowstate_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_tabs.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_tabs_compare.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_link_gentab.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_perchan_menu_item.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_alertmenu.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_perchannelmenu.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_set_guint8.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_show_generic_tab.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_add_chan.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_add_generic_tab.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_handle_drop.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_is_gui_target.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_drag_begin_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_drag_end_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_drag_drop_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_drag_motion_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/fe_flash_window.ml
+Created: /common/facts/src/fe-gtk/maingui.c/fe_set_tab_color.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_focus.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_word_clicked.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_set_access_icon.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_populate_userlist.ml
+Created: /common/facts/src/fe-gtk/maingui.c/fe_set_title.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_progressbar_create.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_progressbar_destroy.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_unpopulate.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_set_topic_tip.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_decide_userlist.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_populate.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_switch_tab_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_bring_tofront_sess.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_bring_tofront.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_switch_page.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_tab_close.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_icon_item.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_tabmenu.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_open_quit_dialog.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_tabwindow_de_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_close_sess.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_xbutton_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_tab_contextmenu_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_destroy_tab_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_submenu.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_color_menu.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_inputbox_rightclick.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_dnd_drop_file.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_dialog_dnd_drop.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_update_xtext.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_textarea.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_center.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_irctab.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_topwindow.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_tabwindow.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_update_meters.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_change_layout.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_apply_setup.ml
+Created: /common/facts/src/fe-gtk/maingui.c/fe_buttons_update.ml
+Created: /common/facts/src/fe-gtk/maingui.c/fe_clear_channel.ml
+Created: /common/facts/src/fe-gtk/maingui.c/fe_set_nonchannel.ml
+Created: /common/facts/src/fe-gtk/maingui.c/fe_dlgbuttons_update.ml
+Created: /common/facts/src/fe-gtk/maingui.c/fe_update_mode_buttons.ml
+Created: /common/facts/src/fe-gtk/maingui.c/fe_set_nick.ml
+Created: /common/facts/src/fe-gtk/maingui.c/fe_set_away.ml
+Created: /common/facts/src/fe-gtk/maingui.c/fe_set_channel.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_changui_new.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_link_irctab.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_detach.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_detach_tab_cb.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_create_generic_tab.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_move_tab.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_move_tab_family.ml
+Created: /common/facts/src/fe-gtk/maingui.c/mg_set_title.ml
+Created: /common/facts/src/fe-gtk/maingui.c/fe_server_callback.ml
+Created: /common/facts/src/fe-gtk/maingui.c/fe_session_callback.ml
+[75/93] Generating hexchat.appdata.xml_merge with a custom command.[K[76/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/setup.c.o'.[K
+Created: /common/facts/src/fe-gtk/setup.c/setup_fontsel_destroy.ml
+Created: /common/facts/src/fe-gtk/setup.c/unslash.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_apply_entry_style.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_apply_to_sess.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_close_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_frame.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_button.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_header.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_color_button.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_other_color.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_other_colorR.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_color_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_fontsel_cancel.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_color_ok_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_toggleL.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_color_page.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_toggleR.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_toggle_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_toggle_sensitive_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_3oggle_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_radio_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_snd_play_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_browsefolder_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_browsefile_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_snd_browse_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_snd_filereq_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_filereq_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_snd_get_selected.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_snd_changed_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_snd_row_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_snd_add_columns.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_snd_populate.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_sound_page.ml
+Created: /common/facts/src/fe-gtk/setup.c/open_data_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_entry.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_browsefont_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_fontsel_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_entry_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_3oggle.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_menu.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_menu_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_radio.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_spin_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_italic_label.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_spin.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_label.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_hscale.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_hscale_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_apply_trans.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_headlabel.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_alert_header.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_page.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_add_page.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_pages.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_create_tree.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_window_open.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_tree_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_tree_select_filter.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_apply_real.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_apply.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_ok_cb.ml
+Created: /common/facts/src/fe-gtk/setup.c/setup_open.ml
+[76/93] Compiling C object 'plugins/sysinfo/plugins@sysinfo@@sysinfo@sha/unix_backend.c.o'.[K[77/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/plugingui.c.o'.[K
+Created: /common/facts/src/fe-gtk/plugingui.c/plugingui_close.ml
+Created: /common/facts/src/fe-gtk/plugingui.c/plugingui_load_cb.ml
+Created: /common/facts/src/fe-gtk/plugingui.c/plugingui_getfilename.ml
+Created: /common/facts/src/fe-gtk/plugingui.c/plugingui_reloadbutton_cb.ml
+Created: /common/facts/src/fe-gtk/plugingui.c/plugingui_unload.ml
+Created: /common/facts/src/fe-gtk/plugingui.c/plugingui_treeview_new.ml
+Created: /common/facts/src/fe-gtk/plugingui.c/fe_pluginlist_update.ml
+Created: /common/facts/src/fe-gtk/plugingui.c/plugingui_load.ml
+Created: /common/facts/src/fe-gtk/plugingui.c/plugingui_loadbutton_cb.ml
+Created: /common/facts/src/fe-gtk/plugingui.c/plugingui_open.ml
+[77/93] Compiling C object 'plugins/sysinfo/plugins@sysinfo@@sysinfo@sha/unix_parse.c.o'.[K[78/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/menu.c.o'.[K
+Created: /common/facts/src/fe-gtk/menu.c/menu_foreach_gui.ml
+Created: /common/facts/src/fe-gtk/menu.c/nick_command.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_radio_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_toggle_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_disconnect.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_quick_item_with_callback.ml
+Created: /common/facts/src/fe-gtk/menu.c/usermenu_destroy.ml
+Created: /common/facts/src/fe-gtk/menu.c/about_dialog_close.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_quick_endsub.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_setting_foreach.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_cmbuttons_toggle.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_ulbuttons_toggle.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_userlist_toggle.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_topicbar_toggle.ml
+Created: /common/facts/src/fe-gtk/menu.c/toggle_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/open_url_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_chan_cycle.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_chan_part.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_chan_join.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_extract_icon.ml
+Created: /common/facts/src/fe-gtk/menu.c/is_in_path.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_nickinfo_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/copy_to_clipboard_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_destroy.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_popup.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_showhide_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_cmbuttons_showhide_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_ulbuttons_showhide_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_topic_showhide_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_addfav_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_delfav_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_addautoconn_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_delautoconn_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_usermenu.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_ulpopup.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_ulbuttons.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_usercommands.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_urlhandlers.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_dlgbuttons.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_ctcpguiopen.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_rpopup.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_away.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_fullscreen_toggle.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_find_item.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_find_path.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_find.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_update_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_del_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_radio_item.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_reorder.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_add_radio.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_about.ml
+Created: /common/facts/src/fe-gtk/menu.c/about_dialog_openurl.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_docs.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_search_prev.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_search_next.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_search.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_savebuffer.ml
+Created: /common/facts/src/fe-gtk/menu.c/savebuffer_req_done.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_flushbuffer.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_copy_selection.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_movetomarker.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_resetmarker.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_rawlog.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_pluginlist.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_dcc_win.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_dcc_chat_win.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_banlist.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_evtpopup.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_keypopup.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_settings.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_chanlist.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_join_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_join.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_join_entry_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_reconnect.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_open_server_list.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_metres_both.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_metres_text.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_metres_graph.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_metres_off.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_apply_metres_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_userlist_showhide_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_quit.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_close.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_detach.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_loadplugin.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_newchannel_window.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_newserver_window.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_newchannel_tab.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_newserver_tab.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_canacaccel.ml
+Created: /common/facts/src/fe-gtk/menu.c/nick_command_parse.ml
+Created: /common/facts/src/fe-gtk/menu.c/userlist_button_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/popup_menu_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_toggle_item.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_add_toggle.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_quick_item.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_create_nickinfo_menu.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_add_item.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_quick_sub.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_add_sub.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_add_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_add_plugin_mainmenu_items.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_create.ml
+Created: /common/facts/src/fe-gtk/menu.c/usermenu_create.ml
+Created: /common/facts/src/fe-gtk/menu.c/fe_userlist_update.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_bar_toggle.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_bar_toggle_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_addfavoritemenu.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_addconnectmenu.ml
+Created: /common/facts/src/fe-gtk/menu.c/usermenu_update.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_change_layout.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_layout_cb.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_set_away.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_set_fullscreen.ml
+Created: /common/facts/src/fe-gtk/menu.c/create_icon_menu.ml
+Created: /common/facts/src/fe-gtk/menu.c/fe_menu_add.ml
+Created: /common/facts/src/fe-gtk/menu.c/fe_menu_del.ml
+Created: /common/facts/src/fe-gtk/menu.c/fe_menu_update.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_add_plugin_items.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_nickmenu.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_urlmenu.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_chanmenu.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_create_main.ml
+Created: /common/facts/src/fe-gtk/menu.c/menu_middlemenu.ml
+[78/93] Compiling C object 'plugins/sysinfo/plugins@sysinfo@@sysinfo@sha/unix_pci.c.o'.[K[79/93] Compiling C object 'plugins/sysinfo/plugins@sysinfo@@sysinfo@sha/sysinfo.c.o'.[K
+Created: /common/facts/plugins/sysinfo/sysinfo.c/sysinfo_get_bool_pref.ml
+Created: /common/facts/plugins/sysinfo/sysinfo.c/get_client.ml
+Created: /common/facts/plugins/sysinfo/sysinfo.c/sysinfo_set_pref_real.ml
+Created: /common/facts/plugins/sysinfo/sysinfo.c/sysinfo_set_pref.ml
+Created: /common/facts/plugins/sysinfo/sysinfo.c/print_info.ml
+Created: /common/facts/plugins/sysinfo/sysinfo.c/should_show_info.ml
+Created: /common/facts/plugins/sysinfo/sysinfo.c/print_summary.ml
+Created: /common/facts/plugins/sysinfo/sysinfo.c/sysinfo_cb.ml
+Created: /common/facts/plugins/sysinfo/sysinfo.c/hexchat_plugin_init.ml
+Created: /common/facts/plugins/sysinfo/sysinfo.c/hexchat_plugin_deinit.ml
+[79/93] Generating hexchat.desktop_merge with a custom command.[K[80/93] Compiling C object 'plugins/sysinfo/plugins@sysinfo@@sysinfo@sha/shared_df.c.o'.[K
+Created: /common/facts/plugins/sysinfo/shared/df.c/xs_parse_df.ml
+[81/93] Compiling C object 'plugins/sysinfo/plugins@sysinfo@@sysinfo@sha/unix_backend.c.o'.[K
+Created: /common/facts/plugins/sysinfo/unix/backend.c/sysinfo_backend_get_os.ml
+Created: /common/facts/plugins/sysinfo/unix/backend.c/sysinfo_backend_get_disk.ml
+Created: /common/facts/plugins/sysinfo/unix/backend.c/sysinfo_backend_get_memory.ml
+Created: /common/facts/plugins/sysinfo/unix/backend.c/sysinfo_backend_get_cpu.ml
+Created: /common/facts/plugins/sysinfo/unix/backend.c/sysinfo_backend_get_gpu.ml
+Created: /common/facts/plugins/sysinfo/unix/backend.c/sysinfo_backend_get_sound.ml
+Created: /common/facts/plugins/sysinfo/unix/backend.c/sysinfo_backend_get_uptime.ml
+Created: /common/facts/plugins/sysinfo/unix/backend.c/sysinfo_backend_get_network.ml
+[82/93] Compiling C object 'plugins/sysinfo/plugins@sysinfo@@sysinfo@sha/unix_match.c.o'.[K
+Created: /common/facts/plugins/sysinfo/unix/match.c/find_match_char.ml
+Created: /common/facts/plugins/sysinfo/unix/match.c/find_match_double.ml
+Created: /common/facts/plugins/sysinfo/unix/match.c/find_match_double_hex.ml
+Created: /common/facts/plugins/sysinfo/unix/match.c/find_match_ll.ml
+[83/93] Compiling C object 'plugins/sysinfo/plugins@sysinfo@@sysinfo@sha/unix_pci.c.o'.[K
+Created: /common/facts/plugins/sysinfo/unix/pci.c/get_conf_word.ml
+Created: /common/facts/plugins/sysinfo/unix/pci.c/scan_device.ml
+Created: /common/facts/plugins/sysinfo/unix/pci.c/scan_devices.ml
+Created: /common/facts/plugins/sysinfo/unix/pci.c/pci_find_by_class.ml
+Created: /common/facts/plugins/sysinfo/unix/pci.c/pci_find_fullname.ml
+[84/93] Compiling C object 'plugins/sysinfo/plugins@sysinfo@@sysinfo@sha/unix_parse.c.o'.[K
+Created: /common/facts/plugins/sysinfo/unix/parse.c/xs_parse_cpu.ml
+Created: /common/facts/plugins/sysinfo/unix/parse.c/xs_parse_uptime.ml
+Created: /common/facts/plugins/sysinfo/unix/parse.c/xs_parse_sound.ml
+Created: /common/facts/plugins/sysinfo/unix/parse.c/xs_parse_video.ml
+Created: /common/facts/plugins/sysinfo/unix/parse.c/xs_parse_ether.ml
+Created: /common/facts/plugins/sysinfo/unix/parse.c/xs_parse_agpbridge.ml
+Created: /common/facts/plugins/sysinfo/unix/parse.c/xs_parse_meminfo.ml
+Created: /common/facts/plugins/sysinfo/unix/parse.c/xs_parse_distro.ml
+[84/93] Linking target plugins/sysinfo/sysinfo.so.[K[85/93] Linking target plugins/sysinfo/sysinfo.so.[K[86/93] Generating hexchat.appdata.xml_merge with a custom command.[K[87/93] Generating hexchat.desktop_merge with a custom command.[K[88/93] Compiling C object 'plugins/python/plugins@python@@python@sha/python.c.o'.[K
+Created: /common/facts/plugins/python/python.c/XChatOut_dealloc.ml
+Created: /common/facts/plugins/python/python.c/Attribute_dealloc.ml
+Created: /common/facts/plugins/python/python.c/Context_dealloc.ml
+Created: /common/facts/plugins/python/python.c/ListItem_dealloc.ml
+Created: /common/facts/plugins/python/python.c/Plugin_GetHandle.ml
+Created: /common/facts/plugins/python/python.c/moduleinit_hexchat.ml
+Created: /common/facts/plugins/python/python.c/PyInit_hexchat.ml
+Created: /common/facts/plugins/python/python.c/moduleinit_xchat.ml
+Created: /common/facts/plugins/python/python.c/PyInit_xchat.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_strip.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_nickcmp.ml
+Created: /common/facts/plugins/python/python.c/Module_xchat_get_lists.ml
+Created: /common/facts/plugins/python/python.c/Context_compare.ml
+Created: /common/facts/plugins/python/python.c/Plugin_GetCurrent.ml
+Created: /common/facts/plugins/python/python.c/Context_set.ml
+Created: /common/facts/plugins/python/python.c/Context_FromContext.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_get_context.ml
+Created: /common/facts/plugins/python/python.c/Attribute_New.ml
+Created: /common/facts/plugins/python/python.c/XChatOut_New.ml
+Created: /common/facts/plugins/python/python.c/ListItem_New.ml
+Created: /common/facts/plugins/python/python.c/Module_xchat_get_list.ml
+Created: /common/facts/plugins/python/python.c/Context_get_list.ml
+Created: /common/facts/plugins/python/python.c/ListItem_repr.ml
+Created: /common/facts/plugins/python/python.c/Attribute_repr.ml
+Created: /common/facts/plugins/python/python.c/Context_get_info.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_get_info.ml
+Created: /common/facts/plugins/python/python.c/Context_emit_print.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_emit_print.ml
+Created: /common/facts/plugins/python/python.c/Context_prnt.ml
+Created: /common/facts/plugins/python/python.c/Module_xchat_prnt.ml
+Created: /common/facts/plugins/python/python.c/Command_PyAbout.ml
+Created: /common/facts/plugins/python/python.c/Context_command.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_command.ml
+Created: /common/facts/plugins/python/python.c/Plugin_FindHook.ml
+Created: /common/facts/plugins/python/python.c/Plugin_RemoveHook.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_unhook.ml
+Created: /common/facts/plugins/python/python.c/Plugin_RemoveAllHooks.ml
+Created: /common/facts/plugins/python/python.c/Plugin_dealloc.ml
+Created: /common/facts/plugins/python/python.c/Plugin_AddHook.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_hook_unload.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_hook_timer.ml
+Created: /common/facts/plugins/python/python.c/Util_ReleaseThread.ml
+Created: /common/facts/plugins/python/python.c/Callback_Timer.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_hook_print_attrs.ml
+Created: /common/facts/plugins/python/python.c/Util_BuildList.ml
+Created: /common/facts/plugins/python/python.c/Callback_Server.ml
+Created: /common/facts/plugins/python/python.c/Callback_Command.ml
+Created: /common/facts/plugins/python/python.c/Util_BuildEOLList.ml
+Created: /common/facts/plugins/python/python.c/Callback_Print_Attrs.ml
+Created: /common/facts/plugins/python/python.c/Callback_Print.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_hook_print.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_hook_server_attrs.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_hook_server.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_hook_command.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_pluginpref_list.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_pluginpref_delete.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_pluginpref_get.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_pluginpref_set.ml
+Created: /common/facts/plugins/python/python.c/Context_FromServerAndChannel.ml
+Created: /common/facts/plugins/python/python.c/Module_hexchat_find_context.ml
+Created: /common/facts/plugins/python/python.c/Module_xchat_get_prefs.ml
+Created: /common/facts/plugins/python/python.c/Callback_ThreadTimer.ml
+Created: /common/facts/plugins/python/python.c/Plugin_ByString.ml
+Created: /common/facts/plugins/python/python.c/Plugin_Delete.ml
+Created: /common/facts/plugins/python/python.c/Command_PyUnload.ml
+Created: /common/facts/plugins/python/python.c/Command_Unload.ml
+Created: /common/facts/plugins/python/python.c/Command_PyList.ml
+Created: /common/facts/plugins/python/python.c/IInterp_Exec.ml
+Created: /common/facts/plugins/python/python.c/IInterp_Cmd.ml
+/common/facts/usr/include/glib-2.0/glib/gstring.h/g_string_append_c_inline.ml exists... skipping.
+Created: /common/facts/plugins/python/python.c/XChatOut_write.ml
+Created: /common/facts/plugins/python/python.c/Util_Expand.ml
+Created: /common/facts/plugins/python/python.c/Plugin_New.ml
+Created: /common/facts/plugins/python/python.c/Command_PyLoad.ml
+Created: /common/facts/plugins/python/python.c/Command_PyReload.ml
+Created: /common/facts/plugins/python/python.c/Command_Reload.ml
+Created: /common/facts/plugins/python/python.c/Command_Load.ml
+Created: /common/facts/plugins/python/python.c/Command_Py.ml
+Created: /common/facts/plugins/python/python.c/Util_Autoload_from.ml
+Created: /common/facts/plugins/python/python.c/Util_Autoload.ml
+Created: /common/facts/plugins/python/python.c/hexchat_plugin_get_info.ml
+Created: /common/facts/plugins/python/python.c/hexchat_plugin_init.ml
+Created: /common/facts/plugins/python/python.c/hexchat_plugin_deinit.ml
+[88/93] Linking target plugins/python/python.so.[K[89/93] Linking target plugins/python/python.so.[K[90/93] Compiling C object 'src/fe-gtk/src@fe-gtk@@hexchat@exe/xtext.c.o'.[K
+Created: /common/facts/src/fe-gtk/xtext.c/xtext_pango_attr.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_size_request.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_selection_clear.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_timeout_ms.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_check_mark_stamp.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_is_selecting.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_fix_indent.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_search_textentry_add.ml
+Created: /common/facts/src/fe-gtk/xtext.c/xtext_do_chunk.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_strip_color.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_selection_get_text.ml
+Created: /common/facts/src/fe-gtk/xtext.c/backend_deinit.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_nth.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_find_subline.ml
+Created: /common/facts/src/fe-gtk/xtext.c/backend_get_text_width_emph.ml
+Created: /common/facts/src/fe-gtk/xtext.c/find_x.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_find_x.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_find_char.ml
+Created: /common/facts/src/fe-gtk/xtext.c/backend_get_text_width_slp.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_text_width_ent.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_text_width.ml
+Created: /common/facts/src/fe-gtk/xtext.c/find_next_wrap.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_check_ent_visibility.ml
+Created: /common/facts/src/fe-gtk/xtext.c/xtext_set_fg.ml
+Created: /common/facts/src/fe-gtk/xtext.c/xtext_set_bg.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_reset.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_search_offset.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_draw_sep.ml
+Created: /common/facts/src/fe-gtk/xtext.c/xtext_draw_layout_line.ml
+Created: /common/facts/src/fe-gtk/xtext.c/backend_draw_text_emph.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_render_flush.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_render_str.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_render_stamp.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_draw_marker.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_render_line.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_render_ents.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_unrender_hilight.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_unselect.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_selection_kill.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_selection_down.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_selection_up.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_selection_render.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_class_init.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_lines_taken.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_adjustment_set.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_calc_lines.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_recalc_widths.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_get_word.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_selection_draw.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_scrollup_timeout.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_scrolldown_timeout.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_selection_update.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_get_word_adjust.ml
+Created: /common/facts/src/fe-gtk/xtext.c/backend_init.ml
+Created: /common/facts/src/fe-gtk/xtext.c/backend_font_close.ml
+Created: /common/facts/src/fe-gtk/xtext.c/backend_font_open_real.ml
+Created: /common/facts/src/fe-gtk/xtext.c/xtext_pango_init.ml
+Created: /common/facts/src/fe-gtk/xtext.c/backend_font_open.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_search_textentry_fini.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_search_textentry_del.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_kill_ent.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_remove_bottom.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_remove_top.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_search_fini.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_search_init.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_unstrip_color.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_search_textentry.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_append_entry.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_get_type.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_set_clip_owner.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_copy_selection.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_paint.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_render_page.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_adjustment_changed.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_scroll_adjustments.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_init.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_adjustment_timeout.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_render_page_timeout.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_expose.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_leave_notify.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_scroll.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_selection_get.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_motion_notify.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_button_release.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_button_press.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_size_allocate.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_unrealize.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_realize.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_set_palette.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_set_font.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_set_background.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_save.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_refresh.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_clear.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_check_marker_visibility.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_search.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_append_indent.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_append.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_is_empty.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_lastlog.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_foreach.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_set_indent.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_set_max_indent.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_set_max_lines.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_set_show_marker.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_set_show_separator.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_set_thin_separator.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_set_time_stamp.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_set_urlcheck_function.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_set_wordwrap.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_set_marker_last.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_reset_marker_pos.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_moveto_marker_pos.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_buffer_show.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_buffer_new.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_new.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_buffer_free.ml
+Created: /common/facts/src/fe-gtk/xtext.c/gtk_xtext_destroy.ml
+[01m[K../src/fe-gtk/xtext.c:[m[K In function '[01m[Kgtk_xtext_find_char[m[K':
+[01m[K../src/fe-gtk/xtext.c:967:18:[m[K [01;35m[Kwarning: [m[K'[01m[Koutofbounds[m[K' may be used uninitialized in this function [[01;35m[K-Wmaybe-uninitialized[m[K]
+   [01;35m[K*out_of_bounds = outofbounds[m[K;
+   [01;35m[K~~~~~~~~~~~~~~~^~~~~~~~~~~~~[m[K
+[90/93] Linking target src/fe-gtk/hexchat.[K[91/93] Linking target src/fe-gtk/hexchat.[K[92/93] Compiling C object 'plugins/perl/plugins@perl@@perl@sha/perl.c.o'.[K
+Created: /common/facts/plugins/perl/perl.c/perl_init.ml
+Created: /common/facts/plugins/perl/perl.c/xs_init.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_Embed_plugingui_remove.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_print.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_nickcmp.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_send_modes.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_emit_print.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_get_prefs.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_get_context.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_find_context.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_plugin_pref_list.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_plugin_pref_get.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_plugin_pref_delete.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_plugin_pref_set.ml
+Created: /common/facts/plugins/perl/perl.c/list_item_to_sv.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_get_list.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_context_info.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_get_info.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_set_context.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_command.ml
+Created: /common/facts/usr/lib/x86_64-linux-gnu/perl/5.24/CORE/inline.h/S_SvREFCNT_dec.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_unhook.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_hook_timer.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_hook_command.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_hook_fd.ml
+Created: /common/facts/plugins/perl/perl.c/execute_perl.ml
+Created: /common/facts/plugins/perl/perl.c/perl_load_file.ml
+Created: /common/facts/plugins/perl/perl.c/perl_auto_load_from_path.ml
+Created: /common/facts/plugins/perl/perl.c/perl_auto_load.ml
+Created: /common/facts/plugins/perl/perl.c/perl_command_eval.ml
+Created: /common/facts/plugins/perl/perl.c/perl_command_reloadall.ml
+Created: /common/facts/plugins/perl/perl.c/perl_command_unloadall.ml
+Created: /common/facts/plugins/perl/perl.c/set_current_package.ml
+Created: /common/facts/plugins/perl/perl.c/fd_cb.ml
+Created: /common/facts/plugins/perl/perl.c/timer_cb.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_hook_print.ml
+Created: /common/facts/plugins/perl/perl.c/print_cb.ml
+Created: /common/facts/plugins/perl/perl.c/array2av.ml
+Created: /common/facts/plugins/perl/perl.c/command_cb.ml
+Created: /common/facts/plugins/perl/perl.c/server_cb.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_hook_server.ml
+Created: /common/facts/plugins/perl/perl.c/XS_HexChat_register.ml
+Created: /common/facts/plugins/perl/perl.c/get_filename.ml
+Created: /common/facts/plugins/perl/perl.c/perl_command_reload.ml
+Created: /common/facts/plugins/perl/perl.c/perl_command_unload.ml
+Created: /common/facts/plugins/perl/perl.c/perl_command_load.ml
+Created: /common/facts/plugins/perl/perl.c/perl_end.ml
+Created: /common/facts/plugins/perl/perl.c/hexchat_plugin_get_info.ml
+Created: /common/facts/plugins/perl/perl.c/hexchat_plugin_init.ml
+Created: /common/facts/plugins/perl/perl.c/hexchat_plugin_deinit.ml
+[92/93] Linking target plugins/perl/perl.so.[K[93/93] Linking target plugins/perl/perl.so.[K
+/
++ sync
++ STATUS=0
++ '[' 0 -ne 0 ']'
++ echo 'Complete (successfully ingested)!'
+Complete (successfully ingested)!
++ exit 0
+[c2ocaml] Ingested 2229 procedures!
+[c2ocaml] Merging ingested procedures...
+/home/jjhenkel/workspace/code-vectors-artifact/c2ocaml/merge-sources /home/jjhenkel/workspace/code-vectors-artifact/c2ocaml/artifacts/hexchat
+[c2ocaml] Created 81 merged files
+[c2ocaml] Cleaning up...
+docker run -it --rm -v /home/jjhenkel/workspace/code-vectors-artifact/c2ocaml/artifacts:/common/facts debian:stretch rm -rf /common/facts/hexchat
+mv /home/jjhenkel/workspace/code-vectors-artifact/c2ocaml/artifacts/hexchat-merged /home/jjhenkel/workspace/code-vectors-artifact/c2ocaml/artifacts/hexchat
+[c2ocaml] Finished! Artifacts placed in the artifacts/hexchat directory.
+[c2ocaml] Use lsee to generate traces
