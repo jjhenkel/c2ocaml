@@ -29,6 +29,7 @@ ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 .PHONY: hexchat
 .PHONY: nmap
 .PHONY: curl
+.PHONY: rq4
 .PHONY: linux
 
 .DEFAULT_GOAL := help
@@ -158,6 +159,26 @@ curl: gcc7.2.0 c2ocaml ## Builds curl and transforms built files from C/C++ to O
 	docker run -it --rm -v ${ROOT_DIR}/artifacts:/common/facts debian:stretch rm -rf /common/facts/curl
 	mv ${ROOT_DIR}/artifacts/curl-merged ${ROOT_DIR}/artifacts/curl
 	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/curl" directory."
+	@echo "[c2ocaml] Use lsee to generate traces"
+
+rq4: gcc7.2.0 c2ocaml ## Builds rq4 and transforms built files from C/C++ to OCaml.
+	@echo "[c2ocaml] Building rq4 docker image..."
+	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/changed-error-codes.env
+	@echo "[c2ocaml] Built!"
+	@echo "[c2ocaml] Ingesting rq4..."
+	docker run -it --rm \
+		--volumes-from=c2ocaml-gcc7.2.0 \
+		--volumes-from=c2ocaml-build \
+		-v ${ROOT_DIR}/artifacts/rq4:/common/facts \
+		c2ocaml/changed-error-codes
+	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/rq4 -type f -name "*.ml" | wc -l) procedures!"
+	@echo "[c2ocaml] Merging ingested procedures..."
+	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/rq4
+	@echo "[c2ocaml] Created $$(find ${ROOT_DIR}/artifacts/rq4-merged -type f | wc -l) merged files"
+	@echo "[c2ocaml] Cleaning up..."
+	docker run -it --rm -v ${ROOT_DIR}/artifacts:/common/facts debian:stretch rm -rf /common/facts/rq4
+	mv ${ROOT_DIR}/artifacts/rq4-merged ${ROOT_DIR}/artifacts/rq4
+	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/rq4" directory."
 	@echo "[c2ocaml] Use lsee to generate traces"
 
 linux: gcc7.2.0 c2ocaml ## Builds linux v4.5-rc4 and transforms built files from C/C++ to OCaml.
