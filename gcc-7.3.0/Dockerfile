@@ -21,6 +21,7 @@ RUN set -ex; \
 			libmpfr-dev \
 			libmpc-dev \
       ca-certificates \
+			file \
 		; \
 		rm -rf /var/lib/apt/lists/*; \
 	fi
@@ -44,9 +45,7 @@ RUN set -ex; \
 		gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
 	done
 
-# Last Modified: 2017-08-14
-ENV GCC_VERSION 7.2.0
-# Docker EOL: 2018-08-14
+ENV GCC_VERSION 7.3.0
 
 RUN set -ex; \
 	\
@@ -140,4 +139,4 @@ RUN set -ex; \
 
 COPY entrypoint.sh /
 
-VOLUME [ "/mnt/gcc7.2.0" ]
+VOLUME [ "/mnt/gcc7.3.0" ]
