@@ -191,7 +191,7 @@ linux: gcc7.2.0 c2ocaml ## Builds linux v4.5-rc4 and transforms built files from
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/linux:/common/facts \
 		c2ocaml/linux \
-		fd7cd061adcf5f7503515ba52b6a724642a839c8
+		47bfa6d9dc8c060bf56554a465c9031e286d2f80
 	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/linux -type f -name "*.ml" | wc -l) procedures!"
 	@echo "[c2ocaml] Merging ingested procedures..."
 	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/linux
