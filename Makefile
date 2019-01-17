@@ -183,14 +183,14 @@ rq4: gcc7.2.0 c2ocaml ## Builds rq4 and transforms built files from C/C++ to OCa
 
 linux: gcc7.2.0 c2ocaml ## Builds linux v4.5-rc4 and transforms built files from C/C++ to OCaml.
 	@echo "[c2ocaml] Building linux docker image..."
-	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/linux/v4.5-rc4/allyes.env
+	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/linux.env
 	@echo "[c2ocaml] Built!"
 	@echo "[c2ocaml] Ingesting linux..."
 	docker run -it --rm \
 		--volumes-from=c2ocaml-gcc7.2.0 \
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/linux:/common/facts \
-		c2ocaml/allyes \
+		c2ocaml/linux \
 		fd7cd061adcf5f7503515ba52b6a724642a839c8
 	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/linux -type f -name "*.ml" | wc -l) procedures!"
 	@echo "[c2ocaml] Merging ingested procedures..."
