@@ -87,7 +87,7 @@ nginx: gcc7.3.0 c2ocaml ## Builds nginx and transforms built files from C/C++ to
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/nginx:/common/facts \
 		c2ocaml/nginx \
-		4bf4650f2f10f7bbacfe7a33da744f18951d416d
+		12645b46e96426719ce96426239e45cfd93ed90c
 	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/nginx -type f -name "*.ml" | wc -l) procedures!"
 	@echo "[c2ocaml] Merging ingested procedures..."
 	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/nginx
@@ -108,7 +108,7 @@ hexchat: gcc7.3.0 c2ocaml ## Builds hexchat and transforms built files from C/C+
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/hexchat:/common/facts \
 		c2ocaml/hexchat \
-		a3db4e577307742965f5ba75daf03146164bd211
+		7abeb10cf1f82fbad4d167f9e6f6918e1f47650b
 	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/hexchat -type f -name "*.ml" | wc -l) procedures!"
 	@echo "[c2ocaml] Merging ingested procedures..."
 	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/hexchat
@@ -129,7 +129,7 @@ nmap: gcc7.3.0 c2ocaml ## Builds nmap and transforms built files from C/C++ to O
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/nmap:/common/facts \
 		c2ocaml/nmap \
-		88b68c45aacc29639940023d9574dc2e851bf8ab
+		71eec581a3890e8f1ab332488014eb4d8dc1b617
 	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/nmap -type f -name "*.ml" | wc -l) procedures!"
 	@echo "[c2ocaml] Merging ingested procedures..."
 	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/nmap
@@ -150,7 +150,7 @@ curl: gcc7.3.0 c2ocaml ## Builds curl and transforms built files from C/C++ to O
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/curl:/common/facts \
 		c2ocaml/curl \
-		cf448436facd28da1bafe031d14a8bc4f165ddaa
+		09662337441c40c23da7b557c4cceacd7cc3b76e
 	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/curl -type f -name "*.ml" | wc -l) procedures!"
 	@echo "[c2ocaml] Merging ingested procedures..."
 	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/curl
