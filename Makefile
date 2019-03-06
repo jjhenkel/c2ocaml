@@ -67,7 +67,7 @@ tests: gcc7.3.0 c2ocaml ## Builds our test suite and transforms them for lsee.
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/tests:/common/facts \
 		c2ocaml/tests \
-		tests
+		spec-stuff
 	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/tests -type f -name "*.ml" | wc -l) procedures!"
 	@echo "[c2ocaml] Merging ingested procedures..."
 	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/tests
