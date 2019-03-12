@@ -223,3 +223,24 @@ linux: gcc7.3.0 c2ocaml ## Builds linux v4.5-rc4 and transforms built files from
 	mv ${ROOT_DIR}/artifacts/linux-merged ${ROOT_DIR}/artifacts/linux
 	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/linux" directory."
 	@echo "[c2ocaml] Use lsee to generate traces"
+
+linux-latest: gcc7.3.0 c2ocaml ## Builds recent linux and transforms built files from C/C++ to OCaml.
+	@echo "[c2ocaml] Building linux docker image..."
+	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/linux.env
+	@echo "[c2ocaml] Built!"
+	@echo "[c2ocaml] Ingesting linux..."
+	docker run -it --rm \
+		--volumes-from=c2ocaml-gcc7.3.0 \
+		--volumes-from=c2ocaml-build \
+		-v ${ROOT_DIR}/artifacts/linux-latest:/common/facts \
+		c2ocaml/linux \
+		12ad143e1b803e541e48b8ba40f550250259ecdd
+	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/linux-latest -type f -name "*.ml" | wc -l) procedures!"
+	@echo "[c2ocaml] Merging ingested procedures..."
+	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/linux-latest
+	@echo "[c2ocaml] Created $$(find ${ROOT_DIR}/artifacts/linux-latest-merged -type f | wc -l) merged files"
+	@echo "[c2ocaml] Cleaning up..."
+	docker run -it --rm -v ${ROOT_DIR}/artifacts:/common/facts debian:stretch rm -rf /common/facts/linux-latest
+	mv ${ROOT_DIR}/artifacts/linux-latest-merged ${ROOT_DIR}/artifacts/linux-latest
+	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/linux-latest" directory."
+	@echo "[c2ocaml] Use lsee to generate traces"
