@@ -130,7 +130,7 @@ hexchat: gcc7.3.0 c2ocaml ## Builds hexchat and transforms built files from C/C+
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/hexchat:/common/facts \
 		c2ocaml/hexchat \
-		7abeb10cf1f82fbad4d167f9e6f6918e1f47650b
+		c1091c38b83ea4267c034817e6b2560e2c54daa3
 	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/hexchat -type f -name "*.ml" | wc -l) procedures!"
 	@echo "[c2ocaml] Merging ingested procedures..."
 	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/hexchat
@@ -172,7 +172,7 @@ curl: gcc7.3.0 c2ocaml ## Builds curl and transforms built files from C/C++ to O
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/curl:/common/facts \
 		c2ocaml/curl \
-		09662337441c40c23da7b557c4cceacd7cc3b76e
+		efd9fba68189c70c2a48d9726b25df25ba87fcd0
 	@echo "[c2ocaml] Ingested $$(find ${ROOT_DIR}/artifacts/curl -type f -name "*.ml" | wc -l) procedures!"
 	@echo "[c2ocaml] Merging ingested procedures..."
 	${ROOT_DIR}/merge-sources ${ROOT_DIR}/artifacts/curl
