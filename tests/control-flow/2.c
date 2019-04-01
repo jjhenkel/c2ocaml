@@ -11,6 +11,7 @@ void example() {
                 addReplyBulk();
             }
         }
+        dictReleaseIterator(A);
     } else if (!strcasecmp()) {
         addReplyLongLong(listLength());
     } else {
