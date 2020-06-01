@@ -4,7 +4,7 @@ set -ex;
 chown -R `stat -c "%u:%g" /common/facts` /common/facts
 
 # First, grab them from the volume
-cp -r /mnt/gcc7.2.0/* /usr/local/
+cp -r /mnt/gcc7.3.0/* /usr/local/
 
 # These are all moved to locations that wont 
 # be automatically picked up by make/cmake/ninja/etc... 

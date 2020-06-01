@@ -22,7 +22,7 @@ export BASH_FUNC_realpath%%
 ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 .PHONY: help
-.PHONY: gcc7.2.0
+.PHONY: gcc7.3.0
 .PHONY: c2ocaml
 .PHONY: redis
 .PHONY: nginx
@@ -42,27 +42,27 @@ help: ## This help.
 		| awk 'BEGIN {FS = ":.*?## "}; \
 		       {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-gcc7.2.0: ## Ensures that the gcc7.2.0 image is pulled from docker hub and runs our c2ocaml-gcc7.2.0 container. 
-	@echo "[c2ocaml] Ensuring we have gcc7.2.0"
-	docker pull jjhenkel/gcc7.2.0
-	@echo "[c2ocaml] Creating c2ocaml-gcc7.2.0 container"
-	docker rm c2ocaml-gcc7.2.0 &> /dev/null || true
-	docker run --name=c2ocaml-gcc7.2.0 jjhenkel/gcc7.2.0 /entrypoint.sh
+gcc7.3.0: ## Ensures that the gcc7.3.0 image is pulled from docker hub and runs our c2ocaml-gcc7.3.0 container. 
+	@echo "[c2ocaml] Ensuring we have gcc7.3.0"
+	docker pull jjhenkel/gcc7.3.0
+	@echo "[c2ocaml] Creating c2ocaml-gcc7.3.0 container"
+	docker rm c2ocaml-gcc7.3.0 &> /dev/null || true
+	docker run --name=c2ocaml-gcc7.3.0 jjhenkel/gcc7.3.0 /entrypoint.sh
 
 c2ocaml: ## Ensures that our c2ocaml source-to-source transformation plugin is pulled from docker hub and runs our c2ocaml-build container.
 	@echo "[c2ocaml] Ensuring we have c2ocaml"
 	docker pull jjhenkel/c2ocaml
 	@echo "[c2ocaml] Creating c2ocaml-build container"
 	docker rm c2ocaml-build &> /dev/null || true
-	docker run --name=c2ocaml-build --volumes-from=c2ocaml-gcc7.2.0:ro -v ${ROOT_DIR}/plugin:/app/Lets/Transform/plugin jjhenkel/c2ocaml
+	docker run --name=c2ocaml-build --volumes-from=c2ocaml-gcc7.3.0:ro -v ${ROOT_DIR}/plugin:/app/Lets/Transform/plugin jjhenkel/c2ocaml
 
-redis: gcc7.2.0 c2ocaml ## Builds redis and transforms built files from C/C++ to OCaml.
+redis: gcc7.3.0 c2ocaml ## Builds redis and transforms built files from C/C++ to OCaml.
 	@echo "[c2ocaml] Building redis docker image..."
 	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/redis.env
 	@echo "[c2ocaml] Built!"
 	@echo "[c2ocaml] Ingesting redis..."
 	docker run -it --rm \
-		--volumes-from=c2ocaml-gcc7.2.0 \
+		--volumes-from=c2ocaml-gcc7.3.0 \
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/redis:/common/facts \
 		c2ocaml/redis \
@@ -77,13 +77,13 @@ redis: gcc7.2.0 c2ocaml ## Builds redis and transforms built files from C/C++ to
 	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/redis" directory."
 	@echo "[c2ocaml] Use lsee to generate traces"
 
-nginx: gcc7.2.0 c2ocaml ## Builds nginx and transforms built files from C/C++ to OCaml.
+nginx: gcc7.3.0 c2ocaml ## Builds nginx and transforms built files from C/C++ to OCaml.
 	@echo "[c2ocaml] Building nginx docker image..."
 	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/nginx.env
 	@echo "[c2ocaml] Built!"
 	@echo "[c2ocaml] Ingesting nginx..."
 	docker run -it --rm \
-		--volumes-from=c2ocaml-gcc7.2.0 \
+		--volumes-from=c2ocaml-gcc7.3.0 \
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/nginx:/common/facts \
 		c2ocaml/nginx \
@@ -98,13 +98,13 @@ nginx: gcc7.2.0 c2ocaml ## Builds nginx and transforms built files from C/C++ to
 	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/nginx" directory."
 	@echo "[c2ocaml] Use lsee to generate traces"
 
-hexchat: gcc7.2.0 c2ocaml ## Builds hexchat and transforms built files from C/C++ to OCaml.
+hexchat: gcc7.3.0 c2ocaml ## Builds hexchat and transforms built files from C/C++ to OCaml.
 	@echo "[c2ocaml] Building hexchat docker image..."
 	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/hexchat.env
 	@echo "[c2ocaml] Built!"
 	@echo "[c2ocaml] Ingesting hexchat..."
 	docker run -it --rm \
-		--volumes-from=c2ocaml-gcc7.2.0 \
+		--volumes-from=c2ocaml-gcc7.3.0 \
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/hexchat:/common/facts \
 		c2ocaml/hexchat \
@@ -119,13 +119,13 @@ hexchat: gcc7.2.0 c2ocaml ## Builds hexchat and transforms built files from C/C+
 	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/hexchat" directory."
 	@echo "[c2ocaml] Use lsee to generate traces"
 
-nmap: gcc7.2.0 c2ocaml ## Builds nmap and transforms built files from C/C++ to OCaml.
+nmap: gcc7.3.0 c2ocaml ## Builds nmap and transforms built files from C/C++ to OCaml.
 	@echo "[c2ocaml] Building nmap docker image..."
 	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/nmap.env
 	@echo "[c2ocaml] Built!"
 	@echo "[c2ocaml] Ingesting nmap..."
 	docker run -it --rm \
-		--volumes-from=c2ocaml-gcc7.2.0 \
+		--volumes-from=c2ocaml-gcc7.3.0 \
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/nmap:/common/facts \
 		c2ocaml/nmap \
@@ -140,13 +140,13 @@ nmap: gcc7.2.0 c2ocaml ## Builds nmap and transforms built files from C/C++ to O
 	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/nmap" directory."
 	@echo "[c2ocaml] Use lsee to generate traces"
 
-curl: gcc7.2.0 c2ocaml ## Builds curl and transforms built files from C/C++ to OCaml.
+curl: gcc7.3.0 c2ocaml ## Builds curl and transforms built files from C/C++ to OCaml.
 	@echo "[c2ocaml] Building curl docker image..."
 	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/curl.env
 	@echo "[c2ocaml] Built!"
 	@echo "[c2ocaml] Ingesting curl..."
 	docker run -it --rm \
-		--volumes-from=c2ocaml-gcc7.2.0 \
+		--volumes-from=c2ocaml-gcc7.3.0 \
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/curl:/common/facts \
 		c2ocaml/curl \
@@ -161,13 +161,13 @@ curl: gcc7.2.0 c2ocaml ## Builds curl and transforms built files from C/C++ to O
 	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/curl" directory."
 	@echo "[c2ocaml] Use lsee to generate traces"
 
-rq4: gcc7.2.0 c2ocaml ## Builds rq4 and transforms built files from C/C++ to OCaml.
+rq4: gcc7.3.0 c2ocaml ## Builds rq4 and transforms built files from C/C++ to OCaml.
 	@echo "[c2ocaml] Building rq4 docker image..."
 	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/changed-error-codes.env
 	@echo "[c2ocaml] Built!"
 	@echo "[c2ocaml] Ingesting rq4..."
 	docker run -it --rm \
-		--volumes-from=c2ocaml-gcc7.2.0 \
+		--volumes-from=c2ocaml-gcc7.3.0 \
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/rq4:/common/facts \
 		c2ocaml/changed-error-codes
@@ -181,13 +181,13 @@ rq4: gcc7.2.0 c2ocaml ## Builds rq4 and transforms built files from C/C++ to OCa
 	@echo "[c2ocaml] Finished! Artifacts placed in the "artifacts/rq4" directory."
 	@echo "[c2ocaml] Use lsee to generate traces"
 
-linux: gcc7.2.0 c2ocaml ## Builds linux v4.5-rc4 and transforms built files from C/C++ to OCaml.
+linux: gcc7.3.0 c2ocaml ## Builds linux v4.5-rc4 and transforms built files from C/C++ to OCaml.
 	@echo "[c2ocaml] Building linux docker image..."
 	${ROOT_DIR}/spec2image/spec2image -e ${ROOT_DIR}/corpus/entrypoint.sh -l c2ocaml -t c2ocaml ${ROOT_DIR}/corpus/linux/v4.5-rc4/allyes.env
 	@echo "[c2ocaml] Built!"
 	@echo "[c2ocaml] Ingesting linux..."
 	docker run -it --rm \
-		--volumes-from=c2ocaml-gcc7.2.0 \
+		--volumes-from=c2ocaml-gcc7.3.0 \
 		--volumes-from=c2ocaml-build \
 		-v ${ROOT_DIR}/artifacts/linux:/common/facts \
 		c2ocaml/allyes \

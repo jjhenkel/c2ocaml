@@ -45,7 +45,7 @@ RUN set -ex; \
 	done
 
 # Last Modified: 2017-08-14
-ENV GCC_VERSION 7.2.0
+ENV GCC_VERSION 7.3.0
 # Docker EOL: 2018-08-14
 
 RUN set -ex; \
@@ -140,4 +140,4 @@ RUN set -ex; \
 
 COPY entrypoint.sh /
 
-VOLUME [ "/mnt/gcc7.2.0" ]
+VOLUME [ "/mnt/gcc7.3.0" ]

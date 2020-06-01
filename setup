@@ -21,7 +21,7 @@ echo "Populating volume with compiled so..."
 docker rm build-c2ocaml &> /dev/null
 #/usr/bin/time -v -o $DIR/Logs/c2ocaml-plugin-build.time \
 docker run --name=build-c2ocaml \
-  --volumes-from=c2ocaml-gcc7.2.0:ro \
+  --volumes-from=c2ocaml-gcc7.3.0:ro \
   -v $DIR/plugin:/app/Lets/Transform/plugin \
   jjhenkel/c2ocaml \
   &> $DIR/logs/c2ocaml-plugin-build.log

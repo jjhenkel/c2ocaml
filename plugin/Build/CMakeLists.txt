@@ -13,7 +13,7 @@ file(GLOB SOURCES "${CMAKE_SOURCE_DIR}/../*.cpp")
 add_definitions(-O3 -std=c++14 -Wall -Wextra -Wpedantic -fPIC -fno-rtti -DREPO_ROOT="${CMAKE_SOURCE_DIR}")
 add_library(c2ocaml SHARED ${SOURCES})
 
-include_directories(c2ocaml /mnt/gcc7.2.0/lib/gcc/x86_64-linux-gnu/7.2.0/plugin/include)
+include_directories(c2ocaml /mnt/gcc7.3.0/lib/gcc/x86_64-linux-gnu/7.3.0/plugin/include)
 
 target_link_libraries(c2ocaml gmp)
 target_link_libraries(c2ocaml gmpxx)
